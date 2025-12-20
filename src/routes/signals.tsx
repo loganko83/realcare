@@ -11,12 +11,14 @@ import { CreateSignalForm } from '../components/ownerSignal/CreateSignalForm';
 import { useMySignals } from '../services/ownerSignal';
 import type { OwnerSignal } from '../types/ownerSignal';
 import { formatKRW } from '../lib/utils/dsr';
+import { useTranslation } from '../lib/i18n/useTranslation';
 
 export const Route = createFileRoute('/signals')({
   component: SignalsPage,
 });
 
 function SignalsPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'browse' | 'my' | 'create'>('browse');
   const [selectedSignal, setSelectedSignal] = useState<OwnerSignal | null>(null);
 
@@ -33,13 +35,13 @@ function SignalsPage() {
   return (
     <div className="p-4 pb-24">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-bold text-slate-800">Owner Signals</h1>
+        <h1 className="text-xl font-bold text-slate-800">{t('signals_page_title')}</h1>
         {activeTab !== 'create' && (
           <button
             onClick={() => setActiveTab('create')}
             className="flex items-center gap-1 px-3 py-2 bg-brand-600 text-white text-sm font-bold rounded-lg hover:bg-brand-700 transition"
           >
-            <Plus size={16} /> New Signal
+            <Plus size={16} /> {t('signals_new')}
           </button>
         )}
       </div>
@@ -53,7 +55,7 @@ function SignalsPage() {
               activeTab === 'browse' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            <List size={16} /> Browse
+            <List size={16} /> {t('signals_browse')}
           </button>
           <button
             onClick={() => setActiveTab('my')}
@@ -61,7 +63,7 @@ function SignalsPage() {
               activeTab === 'my' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            <Send size={16} /> My Signals
+            <Send size={16} /> {t('signals_my')}
             {mySignals && mySignals.length > 0 && (
               <span className="px-1.5 py-0.5 bg-brand-100 text-brand-600 text-xs font-bold rounded-full">
                 {mySignals.length}
@@ -98,22 +100,22 @@ function SignalsPage() {
           {mySignalsLoading && (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full mx-auto" />
-              <p className="text-sm text-slate-500 mt-2">Loading your signals...</p>
+              <p className="text-sm text-slate-500 mt-2">{t('signals_loading')}</p>
             </div>
           )}
 
           {!mySignalsLoading && mySignals?.length === 0 && (
             <div className="bg-gray-50 p-8 rounded-xl text-center">
               <Send size={40} className="mx-auto text-gray-300 mb-3" />
-              <p className="text-slate-600 font-medium">No signals yet</p>
+              <p className="text-slate-600 font-medium">{t('signals_no_signals')}</p>
               <p className="text-sm text-slate-400 mt-1 mb-4">
-                Create your first anonymous property listing
+                {t('signals_create_first')}
               </p>
               <button
                 onClick={() => setActiveTab('create')}
                 className="px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition"
               >
-                Create Signal
+                {t('signals_create')}
               </button>
             </div>
           )}
@@ -156,8 +158,8 @@ function SignalsPage() {
                   </p>
                 </div>
                 <div className="flex gap-4 text-xs text-slate-500">
-                  <span>Views: {signal.stats.viewCount}</span>
-                  <span>Requests: {signal.stats.contactRequestCount}</span>
+                  <span>{t('signals_views')}: {signal.stats.viewCount}</span>
+                  <span>{t('signals_requests')}: {signal.stats.contactRequestCount}</span>
                 </div>
               </div>
             </div>
@@ -173,7 +175,7 @@ function SignalsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-white p-4 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="font-bold text-lg text-slate-800">Signal Details</h2>
+              <h2 className="font-bold text-lg text-slate-800">{t('signals_details')}</h2>
               <button
                 onClick={() => setSelectedSignal(null)}
                 className="p-2 rounded-full hover:bg-gray-100"
@@ -193,7 +195,7 @@ function SignalsPage() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Location</p>
+                <p className="text-sm text-slate-500 mb-1">{t('signals_location')}</p>
                 <p className="font-medium text-slate-800">
                   {selectedSignal.property.district} - {selectedSignal.property.addressMasked}
                 </p>
@@ -201,29 +203,29 @@ function SignalsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-slate-500 mb-1">Area</p>
+                  <p className="text-sm text-slate-500 mb-1">{t('signals_area')}</p>
                   <p className="font-medium text-slate-800">{selectedSignal.property.areaSquareMeters} sqm</p>
                 </div>
                 {selectedSignal.property.floor && (
                   <div>
-                    <p className="text-sm text-slate-500 mb-1">Floor</p>
+                    <p className="text-sm text-slate-500 mb-1">{t('signals_floor')}</p>
                     <p className="font-medium text-slate-800">{selectedSignal.property.floor}F</p>
                   </div>
                 )}
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Price Range</p>
+                <p className="text-sm text-slate-500 mb-1">{t('signals_price_range')}</p>
                 <p className="text-xl font-bold text-brand-600">
                   {formatKRW(selectedSignal.pricing.minPrice)} ~ {formatKRW(selectedSignal.pricing.maxPrice)}
                 </p>
                 {selectedSignal.pricing.isNegotiable && (
-                  <p className="text-sm text-green-600">Price negotiable</p>
+                  <p className="text-sm text-green-600">{t('signals_negotiable')}</p>
                 )}
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Urgency</p>
+                <p className="text-sm text-slate-500 mb-1">{t('signals_urgency')}</p>
                 <span className={`px-2 py-1 text-xs font-bold rounded ${
                   selectedSignal.preferences.urgency === 'urgent' ? 'bg-red-100 text-red-700' :
                   selectedSignal.preferences.urgency === 'flexible' ? 'bg-green-100 text-green-700' :
@@ -234,11 +236,11 @@ function SignalsPage() {
               </div>
 
               <button className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition">
-                Send Contact Request
+                {t('signals_send_request')}
               </button>
 
               <p className="text-xs text-slate-400 text-center">
-                Contact requests require Reality Check score 40+
+                {t('signals_request_note')}
               </p>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { FileText, Check, AlertTriangle, Loader2, X, Camera, Image as ImageIcon,
 import { useContractAnalysis, useSaveAnalysis } from '../lib/hooks/useContractAnalysis';
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { useTranslation } from '../lib/i18n/useTranslation';
 
 export const Route = createFileRoute('/contract')({
   component: ContractPage,
@@ -22,6 +23,7 @@ interface AnalysisResult {
 }
 
 function ContractPage() {
+  const { t } = useTranslation();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [text, setText] = useState("");
   const [lastAnalyzedText, setLastAnalyzedText] = useState("");
@@ -227,8 +229,8 @@ function ContractPage() {
 
   return (
     <div className="p-4 pb-24 relative">
-      <h1 className="text-xl font-bold text-slate-800 mb-2">Contract Safety Care</h1>
-      <p className="text-sm text-slate-500 mb-6">Upload a contract photo or enter clauses to analyze risks.</p>
+      <h1 className="text-xl font-bold text-slate-800 mb-2">{t('contract_page_title')}</h1>
+      <p className="text-sm text-slate-500 mb-6">{t('contract_page_subtitle')}</p>
 
       {/* Upload Area */}
       <div className={`bg-white rounded-2xl border-2 border-dashed ${selectedFile ? 'border-brand-500 bg-brand-50' : 'border-gray-200'} p-6 flex flex-col items-center justify-center mb-6 transition relative min-h-[200px]`}>
@@ -267,7 +269,7 @@ function ContractPage() {
 
                  <div className="h-7 bg-red-50 border-t border-red-100 flex items-center justify-center text-red-600">
                     <FileText size={12} className="mr-1" />
-                    <span className="text-[9px] font-bold">PDF</span>
+                    <span className="text-[9px] font-bold">{t('contract_pdf')}</span>
                  </div>
                </div>
              ) : (
@@ -289,7 +291,7 @@ function ContractPage() {
               <span className="text-xs text-slate-400 bg-white px-2 py-0.5 rounded-full border border-gray-100">
                 {formatBytes(selectedFile.size)}
               </span>
-              <span className="text-xs text-brand-500 font-medium">Ready</span>
+              <span className="text-xs text-brand-500 font-medium">{t('contract_ready')}</span>
             </div>
 
             <button
@@ -302,7 +304,7 @@ function ContractPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">
-            <p className="text-sm font-medium text-slate-600 mb-6">Upload Contract</p>
+            <p className="text-sm font-medium text-slate-600 mb-6">{t('contract_upload_title')}</p>
 
             <div className="flex gap-4 w-full justify-center px-4">
               <button
@@ -312,7 +314,7 @@ function ContractPage() {
                 <div className="p-2 bg-white rounded-full shadow-sm text-brand-500 group-hover:scale-110 transition">
                   <Camera size={24} />
                 </div>
-                <span className="text-xs font-bold">Take Photo</span>
+                <span className="text-xs font-bold">{t('contract_take_photo')}</span>
               </button>
 
               <button
@@ -322,11 +324,11 @@ function ContractPage() {
                 <div className="p-2 bg-white rounded-full shadow-sm text-slate-500 group-hover:scale-110 transition">
                   <ImageIcon size={24} />
                 </div>
-                <span className="text-xs font-bold">Gallery / PDF</span>
+                <span className="text-xs font-bold">{t('contract_gallery')}</span>
               </button>
             </div>
             <p className="text-[10px] text-slate-400 mt-4 flex items-center gap-1">
-              <File size={10} /> Supported: Images (JPG, PNG), PDF
+              <File size={10} /> {t('contract_supported')}
             </p>
           </div>
         )}
@@ -334,10 +336,10 @@ function ContractPage() {
 
       {/* Manual Input */}
       <div className="mb-4">
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">Or enter contract clauses manually</label>
+        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">{t('contract_manual_input')}</label>
         <textarea
           className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm h-32 resize-none"
-          placeholder="Example: If the tenant terminates early, the deposit will not be refunded..."
+          placeholder={t('contract_placeholder')}
           value={text}
           onChange={handleTextChange}
         ></textarea>
@@ -350,8 +352,8 @@ function ContractPage() {
       >
         {loading ? <Loader2 className="animate-spin" size={20}/> : <FileText size={20} />}
         {analysis
-          ? (text !== lastAnalyzedText && text ? "Re-analyze with changes" : "Re-analyze")
-          : "Start Risk Analysis"}
+          ? (text !== lastAnalyzedText && text ? t('contract_reanalyze_changes') : t('contract_reanalyze'))
+          : t('contract_start_analysis')}
       </button>
 
       {/* Analysis Result */}
@@ -362,7 +364,7 @@ function ContractPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="text-brand-600" size={24} />
-                <h2 className="font-bold text-lg text-slate-800">Analysis Report</h2>
+                <h2 className="font-bold text-lg text-slate-800">{t('contract_report')}</h2>
               </div>
               <button
                 onClick={handleAnalyze}
@@ -370,13 +372,13 @@ function ContractPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition shadow-sm"
               >
                 <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-                Re-analyze
+                {t('contract_reanalyze')}
               </button>
             </div>
 
             {/* Summary */}
             <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="font-bold text-slate-800 mb-2">Summary</h3>
+              <h3 className="font-bold text-slate-800 mb-2">{t('contract_summary')}</h3>
               <p className="text-sm text-slate-600 leading-relaxed">{analysis.summary}</p>
             </div>
 
@@ -400,7 +402,7 @@ function ContractPage() {
                       </div>
 
                       <div className="mb-4">
-                          <p className="text-xs text-slate-400 uppercase font-bold mb-1">Related Clause</p>
+                          <p className="text-xs text-slate-400 uppercase font-bold mb-1">{t('contract_related_clause')}</p>
                           <div className="text-sm font-medium text-slate-800 bg-slate-50 p-3 rounded-lg border border-slate-100 italic">
                             "{risk.clause}"
                           </div>
@@ -413,7 +415,7 @@ function ContractPage() {
                       <div className="bg-brand-50 p-3 rounded-lg flex gap-3 items-start border border-brand-100">
                           <CheckCircle className="text-brand-600 shrink-0 mt-0.5" size={18} />
                           <div className="w-full">
-                            <p className="text-xs font-bold text-brand-700 mb-1">Recommended Actions</p>
+                            <p className="text-xs font-bold text-brand-700 mb-1">{t('contract_recommended')}</p>
                             <ul className="text-sm text-brand-800 list-disc pl-4 space-y-1">
                               {Array.isArray(risk.suggestion) ? risk.suggestion.map((step, i) => (
                                 <li key={i}>{step}</li>
@@ -429,14 +431,14 @@ function ContractPage() {
             ) : (
               <div className="bg-green-50 p-5 rounded-xl border border-green-100 text-center">
                 <CheckCircle className="mx-auto text-green-500 mb-2" size={32} />
-                <p className="text-green-800 font-medium">No major risks found!</p>
-                <p className="text-green-600 text-sm mt-1">The analyzed content appears standard.</p>
+                <p className="text-green-800 font-medium">{t('contract_no_risks')}</p>
+                <p className="text-green-600 text-sm mt-1">{t('contract_looks_safe')}</p>
               </div>
             )}
 
             <div className="flex justify-between items-center mb-4 px-2">
                 <button className="text-xs font-medium text-slate-400 hover:text-slate-600">
-                  Disclaimer: This is AI-generated and not legal advice. Consult a professional.
+                  {t('contract_disclaimer')}
               </button>
             </div>
           </div>
@@ -456,15 +458,15 @@ function ContractPage() {
               >
                 {saveStatus === 'saved' ? (
                   <>
-                    <CheckCircle size={18} /> Saved
+                    <CheckCircle size={18} /> {t('contract_saved')}
                   </>
                 ) : saveStatus === 'error' ? (
                   <>
-                    <AlertTriangle size={18} /> Failed
+                    <AlertTriangle size={18} /> {t('contract_failed')}
                   </>
                 ) : (
                   <>
-                    <Save size={18} /> Save
+                    <Save size={18} /> {t('save')}
                   </>
                 )}
               </button>
@@ -475,7 +477,7 @@ function ContractPage() {
                 className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-bold bg-white text-slate-700 border border-gray-200 hover:bg-gray-50 transition shadow-sm"
               >
                 {downloadingPdf ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                PDF
+                {t('contract_pdf')}
               </button>
 
               {saveStatus === 'saved' && (
@@ -484,7 +486,7 @@ function ContractPage() {
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 transition shadow-md"
                 >
                   {shareStatus === 'copied' ? <CheckCircle size={18} /> : <Share2 size={18} />}
-                  {shareStatus === 'copied' ? 'Copied' : 'Share'}
+                  {shareStatus === 'copied' ? t('contract_copied') : t('contract_share')}
                 </button>
               )}
             </div>
@@ -500,7 +502,7 @@ function ContractPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-5">
-              <h3 className="font-bold text-lg text-slate-800">Select Share Format</h3>
+              <h3 className="font-bold text-lg text-slate-800">{t('contract_share_format')}</h3>
               <button
                 onClick={() => setShowShareModal(false)}
                 className="p-1 rounded-full hover:bg-slate-100 text-slate-400"
@@ -518,8 +520,8 @@ function ContractPage() {
                   <FileText size={20} />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-700 group-hover:text-brand-700">Full Report</p>
-                  <p className="text-xs text-slate-500">Summary + all risks + detailed advice</p>
+                  <p className="font-bold text-slate-700 group-hover:text-brand-700">{t('contract_full_report')}</p>
+                  <p className="text-xs text-slate-500">{t('contract_full_desc')}</p>
                 </div>
               </button>
 
@@ -531,8 +533,8 @@ function ContractPage() {
                   <AlignLeft size={20} />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-700 group-hover:text-brand-700">Summary Only</p>
-                  <p className="text-xs text-slate-500">Key points in brief</p>
+                  <p className="font-bold text-slate-700 group-hover:text-brand-700">{t('contract_summary_only')}</p>
+                  <p className="text-xs text-slate-500">{t('contract_summary_desc')}</p>
                 </div>
               </button>
 
@@ -544,14 +546,14 @@ function ContractPage() {
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-700 group-hover:text-red-700">Key Risks Only</p>
-                  <p className="text-xs text-slate-500">Extract important risk items</p>
+                  <p className="font-bold text-slate-700 group-hover:text-red-700">{t('contract_risks_only')}</p>
+                  <p className="text-xs text-slate-500">{t('contract_risks_desc')}</p>
                 </div>
               </button>
             </div>
 
             <div className="mt-4 text-center">
-               <p className="text-[10px] text-slate-400">Selection will copy to clipboard or open share dialog.</p>
+               <p className="text-[10px] text-slate-400">{t('contract_share_note')}</p>
             </div>
           </div>
         </div>

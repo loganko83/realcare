@@ -11,12 +11,14 @@ import { CreateContractForm } from '../components/contract/CreateContractForm';
 import { useMyContracts, useActiveContract, useContract } from '../services/contract';
 import { formatKRW } from '../lib/utils/dsr';
 import { getTimelineProgress } from '../lib/utils/timelineGenerator';
+import { useTranslation } from '../lib/i18n/useTranslation';
 
 export const Route = createFileRoute('/timeline')({
   component: TimelinePage,
 });
 
 function TimelinePage() {
+  const { t } = useTranslation();
   const [view, setView] = useState<'list' | 'detail' | 'create'>('list');
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
 
@@ -47,9 +49,9 @@ function TimelinePage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Smart Move-in</h1>
+          <h1 className="text-xl font-bold text-slate-800">{t('timeline_page_title')}</h1>
           {view === 'list' && (
-            <p className="text-sm text-slate-500">Track your move-in timeline</p>
+            <p className="text-sm text-slate-500">{t('timeline_track')}</p>
           )}
         </div>
         {view === 'list' && (
@@ -57,7 +59,7 @@ function TimelinePage() {
             onClick={() => setView('create')}
             className="flex items-center gap-1 px-3 py-2 bg-brand-600 text-white text-sm font-bold rounded-lg hover:bg-brand-700 transition"
           >
-            <Plus size={16} /> New Contract
+            <Plus size={16} /> {t('timeline_new_contract')}
           </button>
         )}
         {view === 'detail' && (
@@ -65,7 +67,7 @@ function TimelinePage() {
             onClick={() => setView('list')}
             className="flex items-center gap-1 text-slate-600 hover:text-slate-800"
           >
-            <X size={18} /> Close
+            <X size={18} /> {t('timeline_close')}
           </button>
         )}
         {view === 'create' && (
@@ -73,7 +75,7 @@ function TimelinePage() {
             onClick={() => setView('list')}
             className="flex items-center gap-1 text-slate-600 hover:text-slate-800"
           >
-            <X size={18} /> Cancel
+            <X size={18} /> {t('cancel')}
           </button>
         )}
       </div>
@@ -111,7 +113,7 @@ function TimelinePage() {
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-brand-200">Move-in Date</p>
+                <p className="text-brand-200">{t('timeline_move_in_date')}</p>
                 <p className="font-bold">{selectedContract.dates.moveInDate}</p>
               </div>
               <div>
@@ -140,7 +142,7 @@ function TimelinePage() {
           {isLoading && (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full mx-auto" />
-              <p className="text-sm text-slate-500 mt-2">Loading contracts...</p>
+              <p className="text-sm text-slate-500 mt-2">{t('timeline_loading')}</p>
             </div>
           )}
 
@@ -152,7 +154,7 @@ function TimelinePage() {
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-brand-100 text-xs font-bold uppercase">Active Contract</p>
+                  <p className="text-brand-100 text-xs font-bold uppercase">{t('timeline_active_contract')}</p>
                   <h3 className="text-lg font-bold mt-1">{activeContract.property.address}</h3>
                 </div>
                 <ChevronRight size={20} className="text-brand-200" />
@@ -177,7 +179,7 @@ function TimelinePage() {
               </div>
 
               <p className="text-brand-100 text-sm">
-                {getTimelineProgress(activeContract.timeline).completed} of {getTimelineProgress(activeContract.timeline).total} tasks completed
+                {getTimelineProgress(activeContract.timeline).completed} {t('timeline_of')} {getTimelineProgress(activeContract.timeline).total} {t('timeline_tasks_complete')}
               </p>
             </div>
           )}
@@ -214,7 +216,7 @@ function TimelinePage() {
 
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-500">
-                    Move-in: {contract.dates.moveInDate}
+                    {t('timeline_move_in')}: {contract.dates.moveInDate}
                   </span>
                   <span className="font-bold text-slate-800">
                     {formatKRW(contract.financials.totalPrice)}
@@ -240,15 +242,15 @@ function TimelinePage() {
           {!isLoading && (!contracts || contracts.length === 0) && (
             <div className="bg-gray-50 p-8 rounded-xl text-center">
               <Calendar size={48} className="mx-auto text-gray-300 mb-3" />
-              <p className="text-slate-600 font-medium">No contracts yet</p>
+              <p className="text-slate-600 font-medium">{t('timeline_no_contracts')}</p>
               <p className="text-sm text-slate-400 mt-1 mb-4">
-                Register your first contract to get a personalized move-in timeline
+                {t('timeline_create_first')}
               </p>
               <button
                 onClick={() => setView('create')}
                 className="px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition"
               >
-                Create Contract
+                {t('timeline_create_contract')}
               </button>
             </div>
           )}

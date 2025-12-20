@@ -4,6 +4,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, PieChar
 import { useFinancialAdvice } from '../lib/hooks/useFinancialAdvice';
 import { Loader2, Calculator, Building2, Landmark, Coins, Info, Target } from 'lucide-react';
 import { RealityCheckForm } from '../components/realityCheck/RealityCheckForm';
+import { useTranslation } from '../lib/i18n/useTranslation';
 
 export const Route = createFileRoute('/calculators')({
   component: CalculatorsPage,
@@ -24,7 +25,7 @@ const formatCurrency = (val: number) => {
 
 // --- Sub-components ---
 
-function TaxCalculator() {
+function TaxCalculator({ t }: { t: (key: string) => string }) {
   const [taxMode, setTaxMode] = useState<'acquisition' | 'transfer' | 'holding'>('acquisition');
 
   // Acquisition Inputs
@@ -89,24 +90,24 @@ function TaxCalculator() {
   return (
     <div className="space-y-6 animate-fade-in">
        <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-          <button onClick={() => setTaxMode('acquisition')} className={`flex-1 py-1.5 text-xs font-bold rounded-md ${taxMode === 'acquisition' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>Acquisition</button>
-          <button onClick={() => setTaxMode('transfer')} className={`flex-1 py-1.5 text-xs font-bold rounded-md ${taxMode === 'transfer' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>Transfer</button>
-          <button onClick={() => setTaxMode('holding')} className={`flex-1 py-1.5 text-xs font-bold rounded-md ${taxMode === 'holding' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>Holding</button>
+          <button onClick={() => setTaxMode('acquisition')} className={`flex-1 py-1.5 text-xs font-bold rounded-md ${taxMode === 'acquisition' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>{t('calc_tax_acquisition')}</button>
+          <button onClick={() => setTaxMode('transfer')} className={`flex-1 py-1.5 text-xs font-bold rounded-md ${taxMode === 'transfer' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>{t('calc_tax_transfer')}</button>
+          <button onClick={() => setTaxMode('holding')} className={`flex-1 py-1.5 text-xs font-bold rounded-md ${taxMode === 'holding' ? 'bg-white shadow text-slate-800' : 'text-slate-400'}`}>{t('calc_tax_holding')}</button>
        </div>
 
        {taxMode === 'acquisition' && (
          <div className="space-y-6">
             <div className="bg-white p-5 rounded-2xl border border-gray-200 space-y-4">
                 <div>
-                   <label className="text-xs font-bold text-slate-500 mb-1 block">Acquisition Price</label>
+                   <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_acq_price')}</label>
                    <div className="flex items-center gap-2">
                      <input type="number" value={acqPrice} onChange={e => setAcqPrice(Number(e.target.value))} className="w-full p-2 border rounded-lg font-bold text-slate-700" />
-                     <span className="shrink-0 text-sm font-bold text-slate-600">M KRW</span>
+                     <span className="shrink-0 text-sm font-bold text-slate-600">{t('calc_million')}</span>
                    </div>
                    <p className="text-xs text-brand-600 mt-1">{formatMoney(acqPrice)}</p>
                 </div>
                 <div>
-                   <label className="text-xs font-bold text-slate-500 mb-1 block">Houses Owned</label>
+                   <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_houses_owned')}</label>
                    <div className="flex gap-2">
                       {[1, 2, 3].map(n => (
                         <button key={n} onClick={() => setHouseCount(n)} className={`flex-1 py-2 rounded-lg border text-sm font-bold ${houseCount === n ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-200 text-slate-500'}`}>
@@ -117,19 +118,19 @@ function TaxCalculator() {
                 </div>
                 <div className="flex items-center gap-2">
                    <input type="checkbox" id="area85" checked={areaOver85} onChange={e => setAreaOver85(e.target.checked)} className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500"/>
-                   <label htmlFor="area85" className="text-sm text-slate-700">Area over 85sqm (Rural Special Tax)</label>
+                   <label htmlFor="area85" className="text-sm text-slate-700">{t('calc_area_over_85')}</label>
                 </div>
             </div>
 
             <div className="bg-slate-800 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
                 <div className="absolute right-0 top-0 p-4 opacity-10"><Coins size={80} /></div>
-                <p className="text-slate-300 text-sm mb-1">Estimated Acquisition Tax (incl. local)</p>
+                <p className="text-slate-300 text-sm mb-1">{t('calc_est_acq_tax')}</p>
                 <h3 className="text-3xl font-bold mb-2">{formatCurrency(Math.floor(acqResult.amount / 10000) * 10000)} KRW</h3>
                 <div className="inline-block bg-white/20 px-2 py-1 rounded text-xs">
-                    Estimated rate: ~{acqResult.rate.toFixed(2)}%
+                    {t('calc_est_rate')}: ~{acqResult.rate.toFixed(2)}%
                 </div>
             </div>
-            <p className="text-xs text-slate-400 text-center">* Actual amount may vary based on exemptions.</p>
+            <p className="text-xs text-slate-400 text-center">{t('calc_note_exemption')}</p>
          </div>
        )}
 
@@ -138,18 +139,18 @@ function TaxCalculator() {
             <div className="bg-white p-5 rounded-2xl border border-gray-200 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="text-xs font-bold text-slate-500 mb-1 block">Purchase Price (M)</label>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_purchase_price')}</label>
                         <input type="number" value={buyPrice} onChange={e => setBuyPrice(Number(e.target.value))} className="w-full p-2 border rounded-lg text-sm" />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-slate-500 mb-1 block">Sale Price (M)</label>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_sale_price')}</label>
                         <input type="number" value={sellPrice} onChange={e => setSellPrice(Number(e.target.value))} className="w-full p-2 border rounded-lg text-sm" />
                     </div>
                 </div>
                 <div>
-                    <label className="text-xs font-bold text-slate-500 mb-1 block">Holding Period (years)</label>
+                    <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_holding_period')}</label>
                     <input type="range" min="0" max="10" step="1" value={years} onChange={e => setYears(Number(e.target.value))} className="w-full accent-brand-600" />
-                    <div className="text-right text-sm font-bold text-brand-600">{years} years {years === 10 ? '+' : ''}</div>
+                    <div className="text-right text-sm font-bold text-brand-600">{years} {t('calc_years')} {years === 10 ? '+' : ''}</div>
                 </div>
             </div>
 
@@ -157,33 +158,33 @@ function TaxCalculator() {
                 <div className="absolute right-0 top-0 p-4 opacity-10"><Landmark size={80} /></div>
                 <div className="flex justify-between items-end mb-4 border-b border-white/20 pb-4">
                     <div>
-                       <p className="text-slate-300 text-xs">Capital Gain</p>
+                       <p className="text-slate-300 text-xs">{t('calc_capital_gain')}</p>
                        <p className="font-bold text-lg">{(sellPrice - buyPrice) > 0 ? formatMoney(sellPrice - buyPrice) : '0'}</p>
                     </div>
                     <div className="text-right">
-                       <p className="text-slate-300 text-xs">Tax Bracket</p>
+                       <p className="text-slate-300 text-xs">{t('calc_tax_bracket')}</p>
                        <p className="font-bold text-lg">{transferResult.rate}%</p>
                     </div>
                 </div>
-                <p className="text-slate-300 text-sm mb-1">Estimated Transfer Tax (incl. local)</p>
+                <p className="text-slate-300 text-sm mb-1">{t('calc_est_transfer_tax')}</p>
                 <h3 className="text-3xl font-bold">{formatCurrency(Math.floor(transferResult.amount / 10000) * 10000)} KRW</h3>
             </div>
-            <p className="text-xs text-slate-400 text-center">* 1-house exemption not considered in basic calculation.</p>
+            <p className="text-xs text-slate-400 text-center">{t('calc_note_1house')}</p>
          </div>
        )}
 
        {taxMode === 'holding' && (
            <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-300 text-center flex flex-col items-center justify-center min-h-[300px]">
                <Building2 size={48} className="text-gray-300 mb-4" />
-               <h3 className="font-bold text-slate-600 mb-2">Holding Tax Calculator Coming Soon</h3>
-               <p className="text-sm text-slate-400 max-w-xs">Property tax and comprehensive real estate tax will be available after public price announcement.</p>
+               <h3 className="font-bold text-slate-600 mb-2">{t('calc_holding_coming')}</h3>
+               <p className="text-sm text-slate-400 max-w-xs">{t('calc_holding_desc')}</p>
            </div>
        )}
     </div>
   );
 }
 
-function LoanCalculator() {
+function LoanCalculator({ t }: { t: (key: string) => string }) {
     const [income, setIncome] = useState(6000); // Man won
     const [price, setPrice] = useState(80000); // Man won
     const [interestRate, setInterestRate] = useState(4.5);
@@ -230,21 +231,21 @@ function LoanCalculator() {
              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                      <div>
-                        <label className="text-xs font-bold text-slate-500 mb-1 block">Annual Income (10K KRW)</label>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_annual_income')}</label>
                         <input type="number" value={income} onChange={e => setIncome(Number(e.target.value))} className="w-full p-2 border rounded-lg text-sm" />
                      </div>
                      <div>
-                        <label className="text-xs font-bold text-slate-500 mb-1 block">Property Price (10K KRW)</label>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_property_price')}</label>
                         <input type="number" value={price} onChange={e => setPrice(Number(e.target.value))} className="w-full p-2 border rounded-lg text-sm" />
                      </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mb-4">
                      <div>
-                        <label className="text-xs font-bold text-slate-500 mb-1 block">Interest Rate (%)</label>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_interest_rate')}</label>
                         <input type="number" step="0.1" value={interestRate} onChange={e => setInterestRate(Number(e.target.value))} className="w-full p-2 border rounded-lg text-sm" />
                      </div>
                      <div>
-                        <label className="text-xs font-bold text-slate-500 mb-1 block">Loan Term (years)</label>
+                        <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_loan_term')}</label>
                         <div className="flex gap-2">
                             {[30, 40, 50].map(y => (
                                 <button key={y} onClick={() => setTerm(y)} className={`flex-1 py-1 text-xs border rounded ${term === y ? 'bg-slate-800 text-white border-slate-800' : 'text-slate-500 border-gray-200'}`}>{y}y</button>
@@ -253,13 +254,13 @@ function LoanCalculator() {
                      </div>
                 </div>
                 <div>
-                     <label className="text-xs font-bold text-slate-500 mb-1 block">Other Debt Monthly Payment (10K KRW)</label>
+                     <label className="text-xs font-bold text-slate-500 mb-1 block">{t('calc_other_debt')}</label>
                      <input type="number" value={otherDebtPayment} onChange={e => setOtherDebtPayment(Number(e.target.value))} className="w-full p-2 border rounded-lg text-sm" />
                 </div>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <h3 className="font-bold text-slate-800 mb-4">Loan Limit Analysis</h3>
+                <h3 className="font-bold text-slate-800 mb-4">{t('calc_loan_analysis')}</h3>
                 <div className="flex items-center gap-6">
                     <div className="w-32 h-32 relative">
                         <ResponsiveContainer width="100%" height="100%">
@@ -277,11 +278,11 @@ function LoanCalculator() {
                     </div>
                     <div className="flex-1 space-y-3">
                         <div>
-                             <p className="text-xs text-slate-500">Max Loan Amount</p>
+                             <p className="text-xs text-slate-500">{t('calc_max_loan')}</p>
                              <p className="text-xl font-bold text-brand-600">{formatMoney(result.actualLimit / 100)}</p>
                         </div>
                         <div>
-                             <p className="text-xs text-slate-500">Est. Monthly Payment</p>
+                             <p className="text-xs text-slate-500">{t('calc_est_monthly')}</p>
                              <p className="text-base font-bold text-slate-800">{formatCurrency(Math.round(result.monthlyPayment * 10000))} KRW</p>
                         </div>
                     </div>
@@ -289,15 +290,15 @@ function LoanCalculator() {
 
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs text-slate-600">
                    <div className="flex justify-between mb-1">
-                      <span>LTV Limit (70%)</span>
+                      <span>{t('calc_ltv_limit')}</span>
                       <span className="font-bold">{formatMoney(result.ltvMax / 100)}</span>
                    </div>
                    <div className="flex justify-between">
-                      <span>DSR Limit (40%)</span>
+                      <span>{t('calc_dsr_limit')}</span>
                       <span className={`font-bold ${result.limitType === 'DSR' ? 'text-red-500' : ''}`}>{formatMoney(result.dsrMax / 100)}</span>
                    </div>
                    {result.limitType === 'DSR' && (
-                       <p className="mt-2 text-red-500 flex items-center gap-1"><Info size={12}/> DSR regulation reduced your loan limit.</p>
+                       <p className="mt-2 text-red-500 flex items-center gap-1"><Info size={12}/> {t('calc_dsr_warning')}</p>
                    )}
                 </div>
             </div>
@@ -308,18 +309,21 @@ function LoanCalculator() {
 // --- Main Page ---
 
 function CalculatorsPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'reality' | 'tax' | 'loan'>('reality');
+
+  const tabs = [
+    { id: 'reality', labelKey: 'calc_tab_reality', icon: Target },
+    { id: 'tax', labelKey: 'calc_tab_tax', icon: Coins },
+    { id: 'loan', labelKey: 'calc_tab_loan', icon: Landmark },
+  ];
 
   return (
     <div className="p-4 pb-24 h-full flex flex-col">
-      <h1 className="text-xl font-bold text-slate-800 mb-6">Real Estate Calculators</h1>
+      <h1 className="text-xl font-bold text-slate-800 mb-6">{t('calc_page_title')}</h1>
 
       <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
-        {[
-          { id: 'reality', label: 'Reality Check', icon: Target },
-          { id: 'tax', label: 'Tax Calc', icon: Coins },
-          { id: 'loan', label: 'Loan Limit', icon: Landmark },
-        ].map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as 'reality' | 'tax' | 'loan')}
@@ -328,14 +332,14 @@ function CalculatorsPage() {
             }`}
           >
             <tab.icon size={16} />
-            {tab.label}
+            {t(tab.labelKey as any)}
           </button>
         ))}
       </div>
 
       {activeTab === 'reality' && <RealityCheckForm />}
-      {activeTab === 'tax' && <TaxCalculator />}
-      {activeTab === 'loan' && <LoanCalculator />}
+      {activeTab === 'tax' && <TaxCalculator t={t} />}
+      {activeTab === 'loan' && <LoanCalculator t={t} />}
     </div>
   );
 }

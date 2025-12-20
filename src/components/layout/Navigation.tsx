@@ -1,16 +1,18 @@
 import { Link, useLocation } from '@tanstack/react-router';
-import { Home, Calculator, FileText, Calendar, Send, User } from 'lucide-react';
-
-const tabs = [
-  { path: '/', icon: Home, label: 'Home' },
-  { path: '/calculators', icon: Calculator, label: 'Check' },
-  { path: '/signals', icon: Send, label: 'Signals' },
-  { path: '/timeline', icon: Calendar, label: 'Move-in' },
-  { path: '/contract', icon: FileText, label: 'Contract' },
-];
+import { Home, Calculator, FileText, Calendar, Send } from 'lucide-react';
+import { useTranslation } from '../../lib/i18n/useTranslation';
 
 export function Navigation() {
+  const { t } = useTranslation();
   const location = useLocation();
+
+  const tabs = [
+    { path: '/', icon: Home, labelKey: 'nav_home' as const },
+    { path: '/calculators', icon: Calculator, labelKey: 'nav_reality_check' as const },
+    { path: '/signals', icon: Send, labelKey: 'nav_signals' as const },
+    { path: '/timeline', icon: Calendar, labelKey: 'nav_timeline' as const },
+    { path: '/contract', icon: FileText, labelKey: 'nav_contract' as const },
+  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-bottom z-50">
@@ -27,7 +29,7 @@ export function Navigation() {
               }`}
             >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[9px] font-medium">{tab.label}</span>
+              <span className="text-[9px] font-medium">{t(tab.labelKey)}</span>
             </Link>
           );
         })}
