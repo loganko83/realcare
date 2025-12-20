@@ -320,3 +320,42 @@ export const INCOME_THRESHOLDS = {
   LOW_INCOME_MARRIED: 8500,  // 85M KRW married
   NEWLYWED_ELIGIBLE: 13000,  // 130M KRW for newlywed benefits
 } as const;
+
+// Region interface for UI selectors
+export interface RegionOption {
+  id: string;
+  name: string;
+  isSpeculativeZone: boolean;
+  isAdjustedZone: boolean;
+  maxLTV: number;
+}
+
+// Seoul districts for UI
+export const SEOUL_DISTRICTS: RegionOption[] = [
+  { id: 'gangnam', name: 'Gangnam-gu', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'seocho', name: 'Seocho-gu', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'songpa', name: 'Songpa-gu', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'yongsan', name: 'Yongsan-gu', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'mapo', name: 'Mapo-gu', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'seongdong', name: 'Seongdong-gu', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'gangdong', name: 'Gangdong-gu', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'yeongdeungpo', name: 'Yeongdeungpo-gu', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'gwanak', name: 'Gwanak-gu', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+  { id: 'dongdaemun', name: 'Dongdaemun-gu', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+  { id: 'seongbuk', name: 'Seongbuk-gu', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+  { id: 'nowon', name: 'Nowon-gu', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+];
+
+// Gyeonggi cities for UI
+export const GYEONGGI_CITIES: RegionOption[] = [
+  { id: 'bundang', name: 'Seongnam Bundang', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'pangyo', name: 'Pangyo', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'gwacheon', name: 'Gwacheon', isSpeculativeZone: true, isAdjustedZone: true, maxLTV: 50 },
+  { id: 'goyang', name: 'Goyang', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'suwon', name: 'Suwon', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'yongin', name: 'Yongin', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'hanam', name: 'Hanam', isSpeculativeZone: false, isAdjustedZone: true, maxLTV: 60 },
+  { id: 'bucheon', name: 'Bucheon', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+  { id: 'ansan', name: 'Ansan', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+  { id: 'pyeongtaek', name: 'Pyeongtaek', isSpeculativeZone: false, isAdjustedZone: false, maxLTV: 70 },
+];
