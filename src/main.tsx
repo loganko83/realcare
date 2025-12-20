@@ -23,6 +23,7 @@ const queryClient = new QueryClient({
 // Create the router
 const router = createRouter({
   routeTree,
+  basepath: '/real',
   context: {
     queryClient,
   },
