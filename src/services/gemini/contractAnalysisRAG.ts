@@ -3,7 +3,7 @@
  * Uses Gemini with knowledge base for grounded contract analysis
  */
 
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Citation, extractCitations } from './fileSearchStore';
 
 // Import knowledge documents

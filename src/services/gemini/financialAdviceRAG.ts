@@ -3,7 +3,7 @@
  * Uses Gemini with knowledge base for grounded financial advice
  */
 
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { RealityScoreResult } from '../../lib/utils/realityScore';
 import { Citation, extractCitations } from './fileSearchStore';
 import { formatKRW } from '../../lib/utils/dsr';

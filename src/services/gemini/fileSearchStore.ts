@@ -3,7 +3,7 @@
  * Manages RAG knowledge stores for Korean real estate
  */
 
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini client
 const apiKey = typeof process !== 'undefined' && process.env?.GEMINI_API_KEY

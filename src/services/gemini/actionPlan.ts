@@ -3,7 +3,7 @@
  * Uses Gemini API to generate personalized real estate advice
  */
 
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { RealityScoreResult } from '../../lib/utils/realityScore';
 import { formatKRW } from '../../lib/utils/dsr';
 
