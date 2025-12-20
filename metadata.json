@@ -1,0 +1,8 @@
+{
+  "name": "RealCare - 부동산 종합 케어",
+  "description": "의사결정부터 계약, 사후 관리까지 책임지는 부동산 종합 케어 플랫폼. AI 기반 매물 분석, 계약서 리스크 진단, 생애주기 관리 기능을 제공합니다.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
