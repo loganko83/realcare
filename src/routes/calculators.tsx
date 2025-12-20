@@ -2,7 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useFinancialAdvice } from '../lib/hooks/useFinancialAdvice';
-import { Loader2, Calculator, Building2, Landmark, Coins, Info } from 'lucide-react';
+import { Loader2, Calculator, Building2, Landmark, Coins, Info, Target } from 'lucide-react';
+import { RealityCheckForm } from '../components/realityCheck/RealityCheckForm';
 
 export const Route = createFileRoute('/calculators')({
   component: CalculatorsPage,
@@ -22,107 +23,6 @@ const formatCurrency = (val: number) => {
 };
 
 // --- Sub-components ---
-
-function FinancialCheck() {
-  const [income, setIncome] = useState(60); // Millions KRW
-  const [cash, setCash] = useState(200); // Millions KRW
-  const [price, setPrice] = useState(800); // Millions KRW
-  const [showResult, setShowResult] = useState(false);
-
-  const { mutate: getAdvice, data: aiAdvice, isPending: loading } = useFinancialAdvice();
-
-  const calculateScore = () => {
-    const loanNeeded = price - cash;
-    const maxLoan = income * 8; // DSR proxy
-    const loanRatio = loanNeeded / price;
-
-    let baseScore = 100;
-    if (loanRatio > 0.4) baseScore -= 20;
-    if (loanNeeded > maxLoan) baseScore -= 30;
-
-    return Math.max(0, Math.min(100, baseScore));
-  };
-
-  const score = calculateScore();
-  const data = [{ name: 'Score', value: score, fill: score > 70 ? '#10b981' : score > 40 ? '#f59e0b' : '#ef4444' }];
-
-  const handleCalculate = () => {
-    setShowResult(true);
-    getAdvice({ income, cash, price });
-  };
-
-  return (
-    <div className="animate-fade-in">
-      {!showResult ? (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-semibold text-lg mb-4 text-slate-800">Enter Basic Info</h2>
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between mb-2">
-                   <label className="text-sm font-medium text-slate-600">Annual Income</label>
-                   <span className="text-sm font-bold text-brand-600">{income}M KRW</span>
-                </div>
-                <input type="range" min="20" max="200" step="5" value={income} onChange={(e) => setIncome(Number(e.target.value))} className="w-full accent-brand-600"/>
-              </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                   <label className="text-sm font-medium text-slate-600">Available Cash</label>
-                   <span className="text-sm font-bold text-brand-600">{formatMoney(cash)}</span>
-                </div>
-                <input type="range" min="0" max="2000" step="10" value={cash} onChange={(e) => setCash(Number(e.target.value))} className="w-full accent-brand-600"/>
-              </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                   <label className="text-sm font-medium text-slate-600">Target Property Price</label>
-                   <span className="text-sm font-bold text-brand-600">{formatMoney(price)}</span>
-                </div>
-                <input type="range" min="100" max="3000" step="50" value={price} onChange={(e) => setPrice(Number(e.target.value))} className="w-full accent-brand-600"/>
-              </div>
-            </div>
-          </div>
-          <button onClick={handleCalculate} className="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-900 transition flex items-center justify-center gap-2">
-            <Calculator size={20} /> Check Feasibility
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col items-center">
-            <h2 className="font-semibold text-slate-600 mb-2">Reality Check Score</h2>
-            <div className="h-48 w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart innerRadius="70%" outerRadius="100%" barSize={20} data={data} startAngle={180} endAngle={0}>
-                  <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                  <RadialBar background dataKey="value" cornerRadius={10} />
-                </RadialBarChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pt-8 pointer-events-none">
-                 <span className="text-4xl font-bold text-slate-800">{score}</span>
-                 <span className="text-xs text-slate-400">/ 100</span>
-              </div>
-            </div>
-            <p className={`text-center font-medium ${score > 70 ? 'text-green-600' : 'text-red-500'}`}>
-              {score > 70 ? "Safe! You are prepared." : "Risky. Review your budget."}
-            </p>
-          </div>
-
-          <div className="bg-brand-50 p-5 rounded-2xl border border-brand-100">
-            <h3 className="font-bold text-brand-800 mb-2 flex items-center gap-2">
-              AI Analysis Report
-              {loading && <Loader2 size={16} className="animate-spin" />}
-            </h3>
-            <p className="text-sm text-brand-700 leading-relaxed whitespace-pre-wrap">
-              {loading ? "Analyzing regulations and market conditions..." : aiAdvice || "No advice available."}
-            </p>
-          </div>
-          <button onClick={() => setShowResult(false)} className="w-full py-3 rounded-lg border border-gray-300 text-gray-600 font-medium hover:bg-gray-50">
-             Reset and Try Again
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function TaxCalculator() {
   const [taxMode, setTaxMode] = useState<'acquisition' | 'transfer' | 'holding'>('acquisition');
@@ -408,7 +308,7 @@ function LoanCalculator() {
 // --- Main Page ---
 
 function CalculatorsPage() {
-  const [activeTab, setActiveTab] = useState<'check' | 'tax' | 'loan'>('check');
+  const [activeTab, setActiveTab] = useState<'reality' | 'tax' | 'loan'>('reality');
 
   return (
     <div className="p-4 pb-24 h-full flex flex-col">
@@ -416,23 +316,24 @@ function CalculatorsPage() {
 
       <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
         {[
-          { id: 'check', label: 'Reality Check' },
-          { id: 'tax', label: 'Tax Calc' },
-          { id: 'loan', label: 'Loan Limit' },
+          { id: 'reality', label: 'Reality Check', icon: Target },
+          { id: 'tax', label: 'Tax Calc', icon: Coins },
+          { id: 'loan', label: 'Loan Limit', icon: Landmark },
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as 'check' | 'tax' | 'loan')}
-            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition ${
+            onClick={() => setActiveTab(tab.id as 'reality' | 'tax' | 'loan')}
+            className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition flex items-center justify-center gap-1 ${
               activeTab === tab.id ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
+            <tab.icon size={16} />
             {tab.label}
           </button>
         ))}
       </div>
 
-      {activeTab === 'check' && <FinancialCheck />}
+      {activeTab === 'reality' && <RealityCheckForm />}
       {activeTab === 'tax' && <TaxCalculator />}
       {activeTab === 'loan' && <LoanCalculator />}
     </div>

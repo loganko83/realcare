@@ -1,12 +1,12 @@
 import { Link, useLocation } from '@tanstack/react-router';
-import { Home, Calculator, FileText, Building2, User } from 'lucide-react';
+import { Home, Calculator, FileText, Calendar, Send, User } from 'lucide-react';
 
 const tabs = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/calculators', icon: Calculator, label: 'Check' },
-  { path: '/subscription', icon: Building2, label: 'Subscribe' },
+  { path: '/signals', icon: Send, label: 'Signals' },
+  { path: '/timeline', icon: Calendar, label: 'Move-in' },
   { path: '/contract', icon: FileText, label: 'Contract' },
-  { path: '/settings', icon: User, label: 'Profile' },
 ];
 
 export function Navigation() {
