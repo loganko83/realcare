@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
         TanStackRouterVite({
           routesDirectory: './src/routes',
           generatedRouteTree: './src/routeTree.gen.ts',
+          autoCodeSplitting: true,
         }),
         react(),
       ],
@@ -26,6 +27,24 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, './src'),
         }
-      }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'vendor-react': ['react', 'react-dom'],
+              'vendor-tanstack': [
+                '@tanstack/react-query',
+                '@tanstack/react-router',
+                '@tanstack/react-form',
+              ],
+              'vendor-charts': ['recharts', 'd3-shape', 'd3-scale', 'd3-interpolate'],
+              'vendor-jspdf': ['jspdf'],
+              'vendor-html2canvas': ['html2canvas'],
+              'vendor-gemini': ['@google/generative-ai'],
+            },
+          },
+        },
+      },
     };
 });
