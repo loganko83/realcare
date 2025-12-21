@@ -121,7 +121,3 @@ Three knowledge stores for RAG:
 ## Development Specifications
 
 Located in `.specs/` following GitHub Spec-Kit methodology. See `.specs/tasks.md` for consolidated implementation task list organized by phase.
-
-## Legacy Code
-
-Root-level files (`App.tsx`, `index.tsx`, `pages/`, `components/Navigation.tsx`, `services/geminiService.ts`) are legacy from pre-TanStack migration. The active codebase is in `src/`.
