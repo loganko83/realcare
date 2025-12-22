@@ -131,8 +131,7 @@ async def oauth_login(
 async def oauth_callback(
     provider: str,
     code: str = Query(..., description="Authorization code"),
-    state: str = Query(..., description="State parameter"),
-    db: AsyncSession = None
+    state: str = Query(..., description="State parameter")
 ):
     """
     Handle OAuth callback.
