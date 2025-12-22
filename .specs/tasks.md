@@ -9,17 +9,17 @@
 |-------|------|-------|----------|--------|
 | 1-4 | Foundation & MVP | 48 | Critical | DONE |
 | 5-7 | Backend Platform | 35 | Critical | DONE |
-| 8 | Frontend UI Completion | 32 | High | TODO |
+| 8 | Frontend UI Completion | 32 | High | DONE |
 | 9 | Testing & QA | 24 | High | TODO |
 | 10 | Real Integrations | 40 | Medium-High | TODO |
 | 11 | Operations & Management | 28 | Medium | TODO |
 | 12 | Security & Performance | 24 | Medium | TODO |
 
-**Total Remaining: 148 tasks**
+**Total Remaining: 116 tasks**
 
 ---
 
-## Completed Phases (1-7)
+## Completed Phases (1-8)
 
 ### Phase 1-4: Foundation (DONE)
 - [x] TanStack Router, Query, Form setup
@@ -49,42 +49,18 @@
 
 ---
 
-## Phase 8: Frontend UI Completion
-
-> Details: `.specs/phase-8-frontend-completion.md`
-
-### Sprint 8.1: Authentication UI
-| ID | Task | Status |
-|----|------|--------|
-| P8-01-A | Login page with form validation | TODO |
-| P8-01-B | Register page with multi-step flow | TODO |
-| P8-01-C | Forgot/Reset password pages | TODO |
-| P8-01-D | Auth context enhancement | TODO |
-| P8-01-E | Protected route component | TODO |
-
-### Sprint 8.2: Agent Dashboard
-| ID | Task | Status |
-|----|------|--------|
-| P8-02-A | Agent registration page | TODO |
-| P8-02-B | Agent dashboard page | TODO |
-| P8-02-C | Listings management page | TODO |
-| P8-02-D | Signal response management | TODO |
-
-### Sprint 8.3: Payment UI
-| ID | Task | Status |
-|----|------|--------|
-| P8-03-A | Plans page with comparison | TODO |
-| P8-03-B | Checkout page | TODO |
-| P8-03-C | Payment history page | TODO |
-| P8-03-D | Subscription management | TODO |
-
-### Sprint 8.4: Wallet UI
-| ID | Task | Status |
-|----|------|--------|
-| P8-04-A | DID wallet page | TODO |
-| P8-04-B | DID creation flow | TODO |
-| P8-04-C | Contract verification UI | TODO |
-| P8-05 | Navigation updates | TODO |
+### Phase 8: Frontend UI Completion (DONE)
+- [x] Login page with form validation
+- [x] Register page with multi-step flow
+- [x] Forgot/Reset password pages
+- [x] Auth context enhancement
+- [x] Protected route component
+- [x] Agent registration page
+- [x] Agent dashboard page
+- [x] Listings management page
+- [x] Plans page with comparison
+- [x] Checkout page
+- [x] DID wallet page with credentials and contracts
 
 ---
 

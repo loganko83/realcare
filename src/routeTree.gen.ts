@@ -9,14 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as SubscriptionRouteImport } from './routes/subscription'
 import { Route as SignalsRouteImport } from './routes/signals'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PlansRouteImport } from './routes/plans'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ContractRouteImport } from './routes/contract'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CalculatorsRouteImport } from './routes/calculators'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentIndexRouteImport } from './routes/agent/index'
+import { Route as AgentRegisterRouteImport } from './routes/agent/register'
+import { Route as AgentListingsRouteImport } from './routes/agent/listings'
 
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimelineRoute = TimelineRouteImport.update({
   id: '/timeline',
   path: '/timeline',
@@ -37,9 +52,39 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlansRoute = PlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContractRoute = ContractRouteImport.update({
   id: '/contract',
   path: '/contract',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculatorsRoute = CalculatorsRouteImport.update({
@@ -52,77 +97,169 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentIndexRoute = AgentIndexRouteImport.update({
+  id: '/agent/',
+  path: '/agent/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentRegisterRoute = AgentRegisterRouteImport.update({
+  id: '/agent/register',
+  path: '/agent/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentListingsRoute = AgentListingsRouteImport.update({
+  id: '/agent/listings',
+  path: '/agent/listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculators': typeof CalculatorsRoute
+  '/checkout': typeof CheckoutRoute
   '/contract': typeof ContractRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signals': typeof SignalsRoute
   '/subscription': typeof SubscriptionRoute
   '/timeline': typeof TimelineRoute
+  '/wallet': typeof WalletRoute
+  '/agent/listings': typeof AgentListingsRoute
+  '/agent/register': typeof AgentRegisterRoute
+  '/agent': typeof AgentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculators': typeof CalculatorsRoute
+  '/checkout': typeof CheckoutRoute
   '/contract': typeof ContractRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signals': typeof SignalsRoute
   '/subscription': typeof SubscriptionRoute
   '/timeline': typeof TimelineRoute
+  '/wallet': typeof WalletRoute
+  '/agent/listings': typeof AgentListingsRoute
+  '/agent/register': typeof AgentRegisterRoute
+  '/agent': typeof AgentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculators': typeof CalculatorsRoute
+  '/checkout': typeof CheckoutRoute
   '/contract': typeof ContractRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/plans': typeof PlansRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signals': typeof SignalsRoute
   '/subscription': typeof SubscriptionRoute
   '/timeline': typeof TimelineRoute
+  '/wallet': typeof WalletRoute
+  '/agent/listings': typeof AgentListingsRoute
+  '/agent/register': typeof AgentRegisterRoute
+  '/agent/': typeof AgentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/calculators'
+    | '/checkout'
     | '/contract'
+    | '/forgot-password'
+    | '/login'
+    | '/plans'
+    | '/register'
+    | '/reset-password'
     | '/settings'
     | '/signals'
     | '/subscription'
     | '/timeline'
+    | '/wallet'
+    | '/agent/listings'
+    | '/agent/register'
+    | '/agent'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calculators'
+    | '/checkout'
     | '/contract'
+    | '/forgot-password'
+    | '/login'
+    | '/plans'
+    | '/register'
+    | '/reset-password'
     | '/settings'
     | '/signals'
     | '/subscription'
     | '/timeline'
+    | '/wallet'
+    | '/agent/listings'
+    | '/agent/register'
+    | '/agent'
   id:
     | '__root__'
     | '/'
     | '/calculators'
+    | '/checkout'
     | '/contract'
+    | '/forgot-password'
+    | '/login'
+    | '/plans'
+    | '/register'
+    | '/reset-password'
     | '/settings'
     | '/signals'
     | '/subscription'
     | '/timeline'
+    | '/wallet'
+    | '/agent/listings'
+    | '/agent/register'
+    | '/agent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorsRoute: typeof CalculatorsRoute
+  CheckoutRoute: typeof CheckoutRoute
   ContractRoute: typeof ContractRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
+  PlansRoute: typeof PlansRoute
+  RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
   SignalsRoute: typeof SignalsRoute
   SubscriptionRoute: typeof SubscriptionRoute
   TimelineRoute: typeof TimelineRoute
+  WalletRoute: typeof WalletRoute
+  AgentListingsRoute: typeof AgentListingsRoute
+  AgentRegisterRoute: typeof AgentRegisterRoute
+  AgentIndexRoute: typeof AgentIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timeline': {
       id: '/timeline'
       path: '/timeline'
@@ -151,11 +288,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plans': {
+      id: '/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof PlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contract': {
       id: '/contract'
       path: '/contract'
       fullPath: '/contract'
       preLoaderRoute: typeof ContractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculators': {
@@ -172,17 +351,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent/': {
+      id: '/agent/'
+      path: '/agent'
+      fullPath: '/agent'
+      preLoaderRoute: typeof AgentIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/register': {
+      id: '/agent/register'
+      path: '/agent/register'
+      fullPath: '/agent/register'
+      preLoaderRoute: typeof AgentRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/listings': {
+      id: '/agent/listings'
+      path: '/agent/listings'
+      fullPath: '/agent/listings'
+      preLoaderRoute: typeof AgentListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorsRoute: CalculatorsRoute,
+  CheckoutRoute: CheckoutRoute,
   ContractRoute: ContractRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
+  PlansRoute: PlansRoute,
+  RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
   SignalsRoute: SignalsRoute,
   SubscriptionRoute: SubscriptionRoute,
   TimelineRoute: TimelineRoute,
+  WalletRoute: WalletRoute,
+  AgentListingsRoute: AgentListingsRoute,
+  AgentRegisterRoute: AgentRegisterRoute,
+  AgentIndexRoute: AgentIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
