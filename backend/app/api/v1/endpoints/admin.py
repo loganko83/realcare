@@ -16,7 +16,7 @@ from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.agent import Agent, AgentStatus
 from app.models.payment import Payment, PaymentStatus, Subscription
-from app.models.owner_signal import OwnerSignal
+from app.models.owner_signal import OwnerSignal, SignalStatus
 from app.services.auth import AuthService
 
 router = APIRouter()
@@ -115,13 +115,13 @@ async def get_admin_stats(
 
     active_subscriptions = await db.scalar(
         select(func.count(Subscription.id))
-        .where(Subscription.status == "active")
+        .where(Subscription.is_active == True)
     )
 
     # Signal stats
     active_signals = await db.scalar(
         select(func.count(OwnerSignal.id))
-        .where(OwnerSignal.status == "active")
+        .where(OwnerSignal.status == SignalStatus.ACTIVE)
     )
     total_signals = await db.scalar(select(func.count(OwnerSignal.id)))
 
