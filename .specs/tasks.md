@@ -1,466 +1,296 @@
 # RealCare Implementation Tasks
 
 > Consolidated task list following Spec-Kit methodology
+> Updated: 2024-12-22
 
-## Task Overview
+## Phase Overview
 
-| Phase | Name | Tasks | Priority | Dependencies |
-|-------|------|-------|----------|--------------|
-| 1 | Infrastructure & TanStack | 12 | Critical | None |
-| 2 | Reality Check Engine | 10 | Critical | Phase 1 |
-| 3 | Gemini RAG Integration | 8 | High | Phase 1 |
-| 4A | Owner Signal | 8 | Medium | Phase 1, 2 |
-| 4B | Smart Move-in | 10 | Medium | Phase 1 |
+| Phase | Name | Tasks | Priority | Status |
+|-------|------|-------|----------|--------|
+| 1-4 | Foundation & MVP | 48 | Critical | DONE |
+| 5-7 | Backend Platform | 35 | Critical | DONE |
+| 8 | Frontend UI Completion | 32 | High | TODO |
+| 9 | Testing & QA | 24 | High | TODO |
+| 10 | Real Integrations | 40 | Medium-High | TODO |
+| 11 | Operations & Management | 28 | Medium | TODO |
+| 12 | Security & Performance | 24 | Medium | TODO |
+
+**Total Remaining: 148 tasks**
 
 ---
 
-## Phase 1: Infrastructure & TanStack
+## Completed Phases (1-7)
 
-### P1-T01: Install TanStack Dependencies
+### Phase 1-4: Foundation (DONE)
+- [x] TanStack Router, Query, Form setup
+- [x] Reality Check calculations
+- [x] Gemini RAG integration
+- [x] Owner Signal basic features
+- [x] Smart Move-in timeline
+
+### Phase 5: B2B Agent Platform (DONE)
+- [x] Agent model and database schema
+- [x] Agent registration API
+- [x] Agent dashboard API
+- [x] Listings management API
+- [x] Signal response tracking
+
+### Phase 6: DID/Blockchain Integration (DONE)
+- [x] DID service (mock)
+- [x] Xphere blockchain service (mock)
+- [x] DID creation endpoint
+- [x] Contract verification endpoint
+
+### Phase 7: Payment Integration (DONE)
+- [x] Payment model and schema
+- [x] Subscription plans API
+- [x] Payment processing API
+- [x] Subscription management API
+
+---
+
+## Phase 8: Frontend UI Completion
+
+> Details: `.specs/phase-8-frontend-completion.md`
+
+### Sprint 8.1: Authentication UI
+| ID | Task | Status |
+|----|------|--------|
+| P8-01-A | Login page with form validation | TODO |
+| P8-01-B | Register page with multi-step flow | TODO |
+| P8-01-C | Forgot/Reset password pages | TODO |
+| P8-01-D | Auth context enhancement | TODO |
+| P8-01-E | Protected route component | TODO |
+
+### Sprint 8.2: Agent Dashboard
+| ID | Task | Status |
+|----|------|--------|
+| P8-02-A | Agent registration page | TODO |
+| P8-02-B | Agent dashboard page | TODO |
+| P8-02-C | Listings management page | TODO |
+| P8-02-D | Signal response management | TODO |
+
+### Sprint 8.3: Payment UI
+| ID | Task | Status |
+|----|------|--------|
+| P8-03-A | Plans page with comparison | TODO |
+| P8-03-B | Checkout page | TODO |
+| P8-03-C | Payment history page | TODO |
+| P8-03-D | Subscription management | TODO |
+
+### Sprint 8.4: Wallet UI
+| ID | Task | Status |
+|----|------|--------|
+| P8-04-A | DID wallet page | TODO |
+| P8-04-B | DID creation flow | TODO |
+| P8-04-C | Contract verification UI | TODO |
+| P8-05 | Navigation updates | TODO |
+
+---
+
+## Phase 9: Testing & Quality
+
+> Details: `.specs/phase-9-testing.md`
+
+### Sprint 9.1: Backend Unit Tests
+| ID | Task | Status |
+|----|------|--------|
+| P9-01-A | Test infrastructure setup | TODO |
+| P9-01-B | Test fixtures (conftest.py) | TODO |
+| P9-01-C | Authentication tests | TODO |
+| P9-01-D | Reality check tests | TODO |
+| P9-01-E | Agent tests | TODO |
+| P9-01-F | Payment tests | TODO |
+
+### Sprint 9.2: Frontend E2E Tests
+| ID | Task | Status |
+|----|------|--------|
+| P9-02-A | Playwright configuration | TODO |
+| P9-02-B | Authentication E2E tests | TODO |
+| P9-02-C | Reality check E2E tests | TODO |
+| P9-02-D | Agent dashboard E2E tests | TODO |
+| P9-02-E | Payment flow E2E tests | TODO |
+
+### Sprint 9.3: Documentation
+| ID | Task | Status |
+|----|------|--------|
+| P9-03-A | OpenAPI schema enhancement | TODO |
+| P9-03-B | API usage guide | TODO |
+
+---
+
+## Phase 10: Real Integrations
+
+> Details: `.specs/phase-10-real-integrations.md`
+
+### Sprint 10.1: DID BaaS
+| ID | Task | Status |
+|----|------|--------|
+| P10-01-A | DID BaaS service update | TODO |
+| P10-01-B | Credential types definition | TODO |
+| P10-01-C | DID wallet frontend | TODO |
+
+### Sprint 10.2: Xphere Blockchain
+| ID | Task | Status |
+|----|------|--------|
+| P10-02-A | Xphere RPC integration | TODO |
+| P10-02-B | Contract hash storage | TODO |
+
+### Sprint 10.3: Toss Payments
+| ID | Task | Status |
+|----|------|--------|
+| P10-03-A | Toss Payments service | TODO |
+| P10-03-B | Payment webhook handler | TODO |
+| P10-03-C | Frontend payment widget | TODO |
+
+### Sprint 10.4: Social Login
+| ID | Task | Status |
+|----|------|--------|
+| P10-04-A | OAuth service (Kakao, Naver, Google) | TODO |
+| P10-04-B | OAuth endpoints | TODO |
+| P10-04-C | Social login buttons | TODO |
+
+### Sprint 10.5: Naver Maps & Real Estate
+| ID | Task | Status |
+|----|------|--------|
+| P10-05-A | Naver Maps SDK setup | TODO |
+| P10-05-B | Property map component | TODO |
+| P10-05-C | Naver Real Estate integration | TODO |
+
+---
+
+## Phase 11: Operations & Management
+
+> Details: `.specs/phase-11-operations.md`
+
+### Sprint 11.1: Admin Dashboard
+| ID | Task | Status |
+|----|------|--------|
+| P11-01-A | Admin authentication | TODO |
+| P11-01-B | Admin dashboard frontend | TODO |
+| P11-01-C | User management | TODO |
+| P11-01-D | Agent verification | TODO |
+
+### Sprint 11.2: Email Notifications
+| ID | Task | Status |
+|----|------|--------|
+| P11-02-A | Email service setup | TODO |
+| P11-02-B | Email templates | TODO |
+| P11-02-C | Email triggers | TODO |
+
+### Sprint 11.3: Push Notifications
+| ID | Task | Status |
+|----|------|--------|
+| P11-03-A | Web push setup | TODO |
+| P11-03-B | Frontend push integration | TODO |
+
+### Sprint 11.4: File Upload
+| ID | Task | Status |
+|----|------|--------|
+| P11-04-A | File upload service | TODO |
+| P11-04-B | Upload endpoints | TODO |
+| P11-04-C | Frontend upload component | TODO |
+
+### Sprint 11.5: Analytics
+| ID | Task | Status |
+|----|------|--------|
+| P11-05-A | Event tracking service | TODO |
+
+---
+
+## Phase 12: Security & Performance
+
+> Details: `.specs/phase-12-security-performance.md`
+
+### Sprint 12.1: Redis Caching
+| ID | Task | Status |
+|----|------|--------|
+| P12-01-A | Cache service | TODO |
+| P12-01-B | Cache integration | TODO |
+
+### Sprint 12.2: Rate Limiting
+| ID | Task | Status |
+|----|------|--------|
+| P12-02-A | Rate limiter middleware | TODO |
+
+### Sprint 12.3: Security
+| ID | Task | Status |
+|----|------|--------|
+| P12-03-A | Request validation | TODO |
+| P12-03-B | Security headers | TODO |
+
+### Sprint 12.4: Database Performance
+| ID | Task | Status |
+|----|------|--------|
+| P12-04-A | Query optimization | TODO |
+| P12-04-B | Database indexes | TODO |
+
+### Sprint 12.5: Frontend Performance
+| ID | Task | Status |
+|----|------|--------|
+| P12-05-A | Bundle optimization | TODO |
+| P12-05-B | Lazy loading | TODO |
+| P12-05-C | Image optimization | TODO |
+
+### Sprint 12.6: Monitoring
+| ID | Task | Status |
+|----|------|--------|
+| P12-06-A | Structured logging | TODO |
+| P12-06-B | Health checks | TODO |
+| P12-06-C | Nginx configuration | TODO |
+
+---
+
+## External Service Configuration
+
+### Required API Keys
+
 ```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-npm install @tanstack/react-router @tanstack/router-devtools
-npm install @tanstack/react-form @tanstack/zod-form-adapter
-npm install zod ky
+# DID BaaS (Local)
+DID_BAAS_URL=http://localhost:8091/api/v1
+
+# Xphere Blockchain
+XPHERE_RPC_URL=https://en-bkk.x-phere.com
+XPHERE_CHAIN_ID=20250217
+
+# Toss Payments
+TOSS_CLIENT_KEY=test_ck_...
+TOSS_SECRET_KEY=test_sk_...
+
+# Social OAuth
+KAKAO_CLIENT_ID=...
+KAKAO_CLIENT_SECRET=...
+NAVER_CLIENT_ID=...
+NAVER_CLIENT_SECRET=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+
+# Naver Maps
+NAVER_MAP_CLIENT_ID=...
 ```
-- **Effort**: Small
-- **Blocked by**: None
-
-### P1-T02: Create Project Directory Structure
-Restructure project to use `src/` with proper organization:
-```
-src/
-├── main.tsx
-├── App.tsx
-├── router.tsx
-├── components/
-├── routes/
-├── lib/
-├── services/
-├── stores/
-└── types/
-```
-- **Effort**: Medium
-- **Blocked by**: None
-
-### P1-T03: Update Vite Configuration
-- Update path aliases for new structure
-- Configure for `src/` directory
-- **Effort**: Small
-- **Blocked by**: P1-T02
-
-### P1-T04: Setup TanStack Query Provider
-- Create `src/lib/queryClient.ts`
-- Wrap app with `QueryClientProvider`
-- Add DevTools in development
-- **Effort**: Small
-- **Blocked by**: P1-T01, P1-T02
-
-### P1-T05: Setup TanStack Router
-- Create `src/router.tsx` with route definitions
-- Create route components for all pages
-- Replace tab navigation with router links
-- **Effort**: Large
-- **Blocked by**: P1-T02
-
-### P1-T06: Migrate Navigation Component
-- Update Navigation to use router links
-- Maintain mobile-first design
-- Add active state styling
-- **Effort**: Small
-- **Blocked by**: P1-T05
-
-### P1-T07: Create Query Hooks for Saved Analyses
-- `useSavedAnalyses()` - list saved analyses
-- `useSaveAnalysis()` - save new analysis
-- `useDeleteAnalysis()` - delete analysis
-- **Effort**: Medium
-- **Blocked by**: P1-T04
-
-### P1-T08: Create Query Hooks for Contracts
-- `useContracts()` - list user contracts
-- `useContract(id)` - single contract
-- `useCreateContract()` - create contract
-- `useUpdateContract()` - update contract
-- **Effort**: Medium
-- **Blocked by**: P1-T04
-
-### P1-T09: Create Query Hooks for Favorites
-- `useFavorites()` - list favorites
-- `useToggleFavorite()` - add/remove favorite
-- **Effort**: Small
-- **Blocked by**: P1-T04
-
-### P1-T10: Migrate Financial Check Form
-- Convert to TanStack Form
-- Add Zod validation schema
-- Handle submission with query mutation
-- **Effort**: Medium
-- **Blocked by**: P1-T01
-
-### P1-T11: Migrate Contract Registration Form
-- Convert to TanStack Form
-- Add Zod validation schema
-- Integrate with contract query hooks
-- **Effort**: Medium
-- **Blocked by**: P1-T08, P1-T10
-
-### P1-T12: Add TypeScript Strict Mode
-- Update `tsconfig.json` for strict mode
-- Fix any type errors
-- **Effort**: Medium
-- **Blocked by**: All above
 
 ---
 
-## Phase 2: Reality Check Engine
+## Implementation Priority
 
-### P2-T01: Create Regulation Data Constants
-- Define region regulation types
-- Add Seoul district regulations
-- Add other major city regulations
-- **Effort**: Large
-- **Blocked by**: P1-T02
+### Immediate (Sprint 1-2)
+1. **P8-01**: Login/Register UI - Users need to authenticate
+2. **P8-01-E**: Protected routes - Security baseline
 
-### P2-T02: Implement DSR Calculator
-- Create `calculateDSR()` function
-- Handle existing debt breakdown
-- Calculate max loan by DSR
-- Add unit tests
-- **Effort**: Medium
-- **Blocked by**: P1-T02
+### Short-term (Sprint 3-4)
+3. **P8-02**: Agent dashboard - B2B value proposition
+4. **P8-03**: Payment UI - Revenue enablement
+5. **P10-03**: Toss Payments - Real payments
 
-### P2-T03: Implement LTV Calculator
-- Create `calculateLTV()` function
-- Handle region-based limits
-- Handle house count logic
-- Add unit tests
-- **Effort**: Medium
-- **Blocked by**: P2-T01
+### Medium-term (Sprint 5-8)
+6. **P10-04**: Social login - User acquisition
+7. **P10-05**: Naver Maps - Property visualization
+8. **P9**: Testing - Quality assurance
+9. **P10-01/02**: DID/Blockchain real integration
 
-### P2-T04: Implement Reality Score Engine
-- Create `calculateRealityScore()` function
-- Implement score breakdown (LTV, DSR, Gap, Stability)
-- Generate risk factors
-- Add unit tests
-- **Effort**: Large
-- **Blocked by**: P2-T02, P2-T03
-
-### P2-T05: Implement Comprehensive Tax Calculator
-- Create acquisition tax calculator
-- Create transfer tax calculator
-- Create holding tax calculator
-- Add all tax brackets and rates
-- **Effort**: Large
-- **Blocked by**: P2-T01
-
-### P2-T06: Create Region Selector Component
-- Dropdown with search
-- Group by city/district
-- Show regulation summary on selection
-- **Effort**: Medium
-- **Blocked by**: P2-T01
-
-### P2-T07: Create Score Visualization Component
-- Circular gauge for overall score
-- Breakdown bar chart
-- Risk factor list
-- **Effort**: Medium
-- **Blocked by**: P2-T04
-
-### P2-T08: Integrate AI Action Plan
-- Create Gemini prompt for action plan
-- Parse structured response
-- Display recommendations
-- **Effort**: Medium
-- **Blocked by**: P2-T04
-
-### P2-T09: Create Scenario Comparison
-- Allow multiple scenarios
-- Side-by-side comparison UI
-- Highlight differences
-- **Effort**: Medium
-- **Blocked by**: P2-T04
-
-### P2-T10: Create Report Generation
-- Combine all analyses
-- Generate PDF report
-- Save report history
-- **Effort**: Medium
-- **Blocked by**: P2-T04, P2-T05
-
----
-
-## Phase 3: Gemini RAG Integration
-
-### P3-T01: Create File Search Store Service
-- Implement store creation/retrieval
-- Handle three store types
-- Cache store references
-- **Effort**: Medium
-- **Blocked by**: P1-T02
-
-### P3-T02: Prepare Regulation Documents
-- Write LTV/DSR regulation document
-- Write tax regulation documents
-- Write zone classification document
-- Format for optimal chunking
-- **Effort**: Large
-- **Blocked by**: P2-T01
-
-### P3-T03: Prepare Contract Template Documents
-- Write standard lease template
-- Write standard sale template
-- Write risky clause guide
-- **Effort**: Large
-- **Blocked by**: None
-
-### P3-T04: Prepare Legal Precedent Documents
-- Collect relevant court cases
-- Write precedent summaries
-- Organize by dispute type
-- **Effort**: Large
-- **Blocked by**: None
-
-### P3-T05: Implement Document Upload Service
-- Create upload function
-- Handle chunking configuration
-- Track upload status
-- **Effort**: Medium
-- **Blocked by**: P3-T01
-
-### P3-T06: Integrate RAG with Contract Analysis
-- Modify `analyzeContract()` to use File Search
-- Include contracts and precedents stores
-- Extract and display citations
-- **Effort**: Medium
-- **Blocked by**: P3-T01, P3-T03
-
-### P3-T07: Integrate RAG with Financial Advice
-- Modify `getFinancialAdvice()` to use File Search
-- Include regulations store
-- Show applicable regulations
-- **Effort**: Medium
-- **Blocked by**: P3-T01, P3-T02
-
-### P3-T08: Create Knowledge Admin Interface
-- List documents in stores
-- Upload new documents
-- Delete outdated documents
-- Show store statistics
-- **Effort**: Medium
-- **Blocked by**: P3-T01
-
----
-
-## Phase 4A: Owner Signal
-
-### P4A-T01: Create Signal Data Types
-- Define `OwnerSignal` interface
-- Define `PropertyInfo` interface
-- Define `ContactRequest` interface
-- **Effort**: Small
-- **Blocked by**: P1-T02
-
-### P4A-T02: Implement Signal Service
-- `useMySignals()` hook
-- `usePublicSignals()` hook
-- `useCreateSignal()` mutation
-- `useUpdateSignal()` mutation
-- **Effort**: Medium
-- **Blocked by**: P4A-T01, P1-T04
-
-### P4A-T03: Create Signal Form
-- Property information fields
-- Signal type selection
-- Pricing inputs
-- Preference settings
-- **Effort**: Medium
-- **Blocked by**: P4A-T01, P1-T10
-
-### P4A-T04: Create Signal Listing Page
-- Signal cards with masking
-- Filter sidebar
-- Pagination
-- **Effort**: Medium
-- **Blocked by**: P4A-T02
-
-### P4A-T05: Implement Contact Request Flow
-- Reality Score gate
-- Request form
-- Request submission
-- **Effort**: Medium
-- **Blocked by**: P4A-T02, P2-T04
-
-### P4A-T06: Create My Signals Management
-- List user's signals
-- Edit/pause/delete actions
-- View contact requests
-- Accept/reject requests
-- **Effort**: Medium
-- **Blocked by**: P4A-T02
-
-### P4A-T07: Create Signal Detail Page
-- Full property info (masked)
-- Contact request button
-- Similar signals
-- **Effort**: Small
-- **Blocked by**: P4A-T02
-
-### P4A-T08: Add Signal Routes
-- `/signals` - listing
-- `/signals/create` - creation
-- `/signals/:id` - detail
-- `/signals/my` - management
-- **Effort**: Small
-- **Blocked by**: P1-T05
-
----
-
-## Phase 4B: Smart Move-in
-
-### P4B-T01: Create Contract Data Types
-- Define `Contract` interface
-- Define `TimelineItem` interface
-- Define `PartnerService` interface
-- **Effort**: Small
-- **Blocked by**: P1-T02
-
-### P4B-T02: Implement Timeline Generator
-- Create template definitions
-- Implement `generateTimeline()` function
-- Handle contract type conditions
-- **Effort**: Medium
-- **Blocked by**: P4B-T01
-
-### P4B-T03: Create Partner Service Data
-- Define all partner services
-- Organize by category
-- Include URLs and discounts
-- **Effort**: Small
-- **Blocked by**: P4B-T01
-
-### P4B-T04: Implement Contract Service
-- `useContracts()` hook
-- `useContract(id)` hook
-- `useCreateContract()` mutation
-- Auto-generate timeline on create
-- **Effort**: Medium
-- **Blocked by**: P4B-T01, P4B-T02
-
-### P4B-T05: Create Task Management Hooks
-- `useUpdateTaskStatus()` mutation
-- `useToggleSubtask()` mutation
-- `useAddCustomTask()` mutation
-- **Effort**: Medium
-- **Blocked by**: P4B-T04
-
-### P4B-T06: Create Timeline Visualization
-- Vertical timeline layout
-- D-day indicators
-- Status colors
-- Progress tracking
-- **Effort**: Large
-- **Blocked by**: P4B-T02
-
-### P4B-T07: Create Task Card Component
-- Title and description
-- Subtask checklist
-- Partner service link
-- Complete button
-- **Effort**: Medium
-- **Blocked by**: P4B-T05
-
-### P4B-T08: Create Contract Registration Form
-- Property info fields
-- Date pickers
-- Financial details
-- Counter-party info
-- **Effort**: Medium
-- **Blocked by**: P4B-T04, P1-T10
-
-### P4B-T09: Implement Notification System
-- Calculate upcoming deadlines
-- Show in-app notifications
-- Optional push notifications (PWA)
-- **Effort**: Medium
-- **Blocked by**: P4B-T04
-
-### P4B-T10: Add Contract Routes
-- `/contracts` - listing
-- `/contracts/create` - registration
-- `/contracts/:id` - overview
-- `/contracts/:id/timeline` - timeline view
-- **Effort**: Small
-- **Blocked by**: P1-T05
-
----
-
-## Implementation Order
-
-### Sprint 1: Foundation
-1. P1-T01 Install Dependencies
-2. P1-T02 Directory Structure
-3. P1-T03 Vite Configuration
-4. P1-T04 Query Provider
-5. P1-T05 Router Setup
-6. P1-T06 Navigation Migration
-
-### Sprint 2: Query Migration
-7. P1-T07 Saved Analyses Hooks
-8. P1-T08 Contract Hooks
-9. P1-T09 Favorites Hooks
-10. P1-T10 Financial Form Migration
-11. P1-T11 Contract Form Migration
-12. P1-T12 TypeScript Strict
-
-### Sprint 3: Reality Check Core
-13. P2-T01 Regulation Data
-14. P2-T02 DSR Calculator
-15. P2-T03 LTV Calculator
-16. P2-T04 Reality Score Engine
-17. P2-T05 Tax Calculator
-
-### Sprint 4: Reality Check UI
-18. P2-T06 Region Selector
-19. P2-T07 Score Visualization
-20. P2-T08 AI Action Plan
-21. P2-T09 Scenario Comparison
-22. P2-T10 Report Generation
-
-### Sprint 5: RAG Foundation
-23. P3-T01 File Search Store Service
-24. P3-T02 Regulation Documents
-25. P3-T03 Contract Templates
-26. P3-T04 Legal Precedents
-
-### Sprint 6: RAG Integration
-27. P3-T05 Document Upload
-28. P3-T06 Contract Analysis RAG
-29. P3-T07 Financial Advice RAG
-30. P3-T08 Knowledge Admin
-
-### Sprint 7: Owner Signal
-31. P4A-T01 Signal Types
-32. P4A-T02 Signal Service
-33. P4A-T03 Signal Form
-34. P4A-T04 Signal Listing
-35. P4A-T05 Contact Request
-36. P4A-T06 My Signals
-37. P4A-T07 Signal Detail
-38. P4A-T08 Signal Routes
-
-### Sprint 8: Smart Move-in
-39. P4B-T01 Contract Types
-40. P4B-T02 Timeline Generator
-41. P4B-T03 Partner Services
-42. P4B-T04 Contract Service
-43. P4B-T05 Task Hooks
-44. P4B-T06 Timeline Visualization
-45. P4B-T07 Task Card
-46. P4B-T08 Contract Form
-47. P4B-T09 Notifications
-48. P4B-T10 Contract Routes
+### Long-term (Sprint 9-12)
+10. **P11**: Operations features
+11. **P12**: Security & Performance
 
 ---
 
@@ -469,14 +299,17 @@ src/
 For each task:
 - [ ] Code implemented and tested
 - [ ] TypeScript types defined
-- [ ] Component/function documented
 - [ ] No console errors
-- [ ] Works on mobile viewport
-- [ ] Code reviewed (if applicable)
+- [ ] Mobile responsive (Tailwind)
+- [ ] i18n support (Korean/English)
+- [ ] Code reviewed
+
+---
 
 ## Notes
 
-- All tasks assume English-only code comments
+- All code comments in English only
 - Korean text only in user-facing strings
-- TanStack devtools enabled in development only
-- LocalStorage used for MVP; backend integration in future phase
+- Backend runs on port 8092
+- DID BaaS runs on port 8091
+- Frontend builds to `/real/` subdirectory

@@ -1,16 +1,17 @@
 # RealCare Project Constitution
 
 > Spec-Driven Development Constitution for RealCare - Real Estate Care Platform
+> Updated: 2024-12-22 (v2.0)
 
 ## Project Identity
 
 | Attribute | Value |
 |-----------|-------|
 | **Name** | RealCare |
-| **Version** | 1.0.0 |
-| **Type** | PropTech SaaS Platform |
-| **Primary Language** | TypeScript |
-| **Target Users** | Korean real estate buyers, sellers, renters, and agents |
+| **Version** | 2.0.0 |
+| **Type** | PropTech SaaS Platform (B2B/B2C) |
+| **Primary Language** | TypeScript (Frontend), Python (Backend) |
+| **Target Users** | Korean real estate buyers, sellers, renters, and licensed agents |
 
 ## Core Principles
 
@@ -31,56 +32,77 @@
 - RAG (Retrieval Augmented Generation) via Gemini File Search API
 - Knowledge base includes Korean real estate regulations, standard contracts, legal precedents
 
-### 4. Data Security
+### 4. Blockchain-First Trust
+- DID (Decentralized Identity) for user verification
+- Verifiable Credentials for trust scoring
+- Xphere blockchain for immutable contract stamping
+- Zero-Knowledge Proofs for privacy-preserving verification
+
+### 5. Data Security
 - No hardcoded API keys (environment variables only)
 - User financial data encrypted at rest
 - Contract documents stored securely with access control
+- DID-based identity for sensitive operations
 
 ## Technology Stack
 
-### Frontend (Current)
+### Frontend
 ```yaml
 Framework: React 19 + Vite 6
 Language: TypeScript 5.8
-Styling: Tailwind CSS (CDN)
-Charts: Recharts
+State: TanStack Query v5
+Routing: TanStack Router v1 (file-based)
+Forms: TanStack Form + Zod
+Styling: Tailwind CSS v4
+Charts: Recharts (lazy-loaded)
 Icons: lucide-react
-AI: @google/genai (Gemini)
-PDF: jsPDF + html2canvas
+AI: @google/generative-ai (Gemini)
+PDF: jsPDF + html2canvas (lazy-loaded)
+Maps: Naver Maps SDK
+Error Tracking: Sentry
 ```
 
-### Frontend (Target)
-```yaml
-State Management: TanStack Query v5
-Routing: TanStack Router v1
-Forms: TanStack Form v0
-Validation: Zod
-HTTP Client: ky or fetch with wrapper
-```
-
-### AI/RAG
-```yaml
-LLM: Gemini 2.5 Flash
-RAG: Gemini File Search API
-Knowledge Store: FileSearchStore for regulations and contracts
-```
-
-### Backend (Planned)
+### Backend
 ```yaml
 Runtime: FastAPI (Python 3.11+)
-Database: PostgreSQL + SQLAlchemy async
-Cache: Redis
-Auth: JWT + Social (Kakao, Naver)
-API: RESTful with OpenAPI
+Database: PostgreSQL 15 + SQLAlchemy async + asyncpg
+Migrations: Alembic
+Cache: Redis 7
+Auth: JWT (python-jose) + bcrypt
+Validation: Pydantic v2
+HTTP Client: httpx (async)
+Logging: structlog
 ```
 
-### Blockchain & DID (Planned)
+### External Services
 ```yaml
-Blockchain: Xphere (EVM-compatible, chainId: 20250217)
-DID Service: DID BaaS (https://trendy.storydot.kr/did-baas)
-SDK: @did-baas/sdk (npm)
-Standards: W3C DID Core 1.0, W3C VC Data Model 1.1
-Features: Verifiable Credentials, ZKP, BBS+ Signatures
+# AI Service
+AI Provider: Google Gemini 2.5 Flash
+RAG: Gemini File Search API
+
+# Blockchain & Identity
+Blockchain: Xphere (EVM Layer1)
+  Chain ID: 20250217
+  RPC URL: https://en-bkk.x-phere.com
+DID Service: DID BaaS
+  Server Path: /mnt/storage/did_baas
+  Local Port: 8091
+  Standards: W3C DID Core 1.0, W3C VC Data Model 1.1
+
+# Payment Gateway
+Payment: Toss Payments
+  API Version: 2022-11-16
+  Docs: https://docs.tosspayments.com
+
+# Social Login
+OAuth Providers:
+  - Kakao (kakao.com)
+  - Naver (naver.com)
+  - Google (google.com)
+
+# Maps & Real Estate Data
+Maps: Naver Maps API
+Real Estate Data: Naver Real Estate (land.naver.com)
 ```
 
 ## Development Standards
@@ -92,74 +114,91 @@ Features: Verifiable Credentials, ZKP, BBS+ Signatures
 - Consistent file naming: PascalCase for components, camelCase for utilities
 
 ### Git Workflow
-- Feature branches from `main`
+- Feature branches from `master`
 - Conventional commits (feat:, fix:, docs:, refactor:)
-- PR reviews required for `main`
+- PR reviews required for `master`
 
 ### Testing Strategy
-- Unit tests for calculation logic
-- Integration tests for API calls
-- E2E tests for critical user flows
+- Backend: pytest + httpx for API tests
+- Frontend: Playwright for E2E tests
+- Coverage target: >80% for critical paths
 
 ## Architecture Decisions
 
 ### ADR-001: TanStack over Redux/Zustand
 **Decision**: Use TanStack Query for server state instead of Redux or Zustand
-**Rationale**:
-- Most state is server-derived (regulations, calculations, analyses)
-- Built-in caching, deduplication, background refetching
-- Reduces boilerplate significantly
+**Rationale**: Most state is server-derived, built-in caching and background refetching
 
 ### ADR-002: Gemini File Search for RAG
 **Decision**: Use Gemini File Search API instead of Pinecone/Chroma
-**Rationale**:
-- Already using Gemini for AI features
-- Managed service, no infrastructure overhead
-- Automatic chunking and embedding
+**Rationale**: Already using Gemini for AI, managed service with no infrastructure overhead
 
-### ADR-003: Client-Side First
-**Decision**: Start with client-side application, add backend incrementally
-**Rationale**:
-- Faster iteration on UI/UX
-- Core calculations can run client-side
-- Backend added for persistence, auth, and sensitive operations
+### ADR-003: FastAPI Backend
+**Decision**: Use FastAPI with async SQLAlchemy
+**Rationale**: High performance, automatic OpenAPI docs, excellent async support
+
+### ADR-004: Xphere for Blockchain
+**Decision**: Use Xphere EVM chain instead of Polygon/Ethereum
+**Rationale**: Lower gas costs, Korean ecosystem support, EVM compatibility
+
+### ADR-005: DID BaaS for Identity
+**Decision**: Use DID BaaS service at /mnt/storage/did_baas
+**Rationale**: W3C standards compliance, ZKP support, BBS+ signatures
+
+### ADR-006: Toss Payments for PG
+**Decision**: Use Toss Payments instead of Inicis/KCP
+**Rationale**: Modern API, better developer experience, widespread adoption in Korea
+
+### ADR-007: Naver Maps over Kakao Maps
+**Decision**: Use Naver Maps with Naver Real Estate integration
+**Rationale**: Better real estate data integration, comprehensive property information
 
 ## Feature Prioritization (MoSCoW)
 
-### Must Have (MVP)
-- Reality Check calculator with accurate LTV/DSR
-- Contract risk analysis with Gemini AI
-- Tax calculator (acquisition, transfer, holding)
-- Basic user data persistence (localStorage initially)
+### Must Have (MVP - Completed)
+- [x] Reality Check calculator with accurate LTV/DSR
+- [x] Contract risk analysis with Gemini AI
+- [x] Tax calculator (acquisition, transfer, holding)
+- [x] User authentication (JWT)
+- [x] Backend API with PostgreSQL
 
-### Should Have
-- User authentication
-- Server-side data persistence
-- RAG with Korean regulations knowledge base
-- Push notifications for contract deadlines
+### Should Have (Phase 8-10)
+- [ ] Login/Register UI components
+- [ ] Social login (Kakao, Naver, Google)
+- [ ] B2B Agent dashboard UI
+- [ ] Subscription payment UI
+- [ ] DID wallet UI
+- [ ] Naver Maps integration
+- [ ] Toss Payments integration
+- [ ] Real blockchain transactions
 
-### Could Have
-- Owner Signal system
-- Smart Move-in timeline
-- Agent dashboard
+### Could Have (Phase 11-12)
+- [ ] Admin dashboard
+- [ ] Email/Push notifications
+- [ ] File upload for contracts
+- [ ] Advanced analytics
+- [ ] Rate limiting
+- [ ] Redis caching
+
+### Won't Have (v2.0)
 - Mobile app (React Native)
-
-### Won't Have (v1.0)
-- Blockchain notarization
-- Payment processing
-- Real-time property data integration
+- Multi-language beyond Korean/English
+- International market support
 
 ## Success Metrics
 
 | Metric | Target |
 |--------|--------|
-| Reality Score calculation accuracy | >95% vs manual calculation |
-| Contract analysis response time | <5 seconds |
-| User task completion rate | >80% |
-| Mobile Lighthouse score | >90 |
+| API Response Time | <200ms p95 |
+| Error Rate | <0.1% |
+| Reality Score accuracy | >95% vs manual |
+| User Registration | >100/week |
+| Agent Conversion | >5% trial to paid |
+| Contract Stamps | >50/month |
 
 ## Versioning
 
 This constitution follows semantic versioning. Major changes require team review.
 
 - **1.0.0** (2024-12-20): Initial constitution
+- **2.0.0** (2024-12-22): Added backend, blockchain, payment integrations
