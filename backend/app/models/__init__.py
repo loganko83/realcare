@@ -4,6 +4,7 @@ from app.models.user import User, UserRole, AuthProvider
 from app.models.reality_report import RealityReport, TransactionType
 from app.models.owner_signal import OwnerSignal, SignalInterest, PropertyType, SignalStatus
 from app.models.contract import Contract, TimelineTask, ContractType, ContractStatus
+from app.models.agent import Agent, AgentListing, AgentSignalResponse, AgentStatus, AgentTier
 
 __all__ = [
     # Base
@@ -27,4 +28,10 @@ __all__ = [
     "TimelineTask",
     "ContractType",
     "ContractStatus",
+    # Agent
+    "Agent",
+    "AgentListing",
+    "AgentSignalResponse",
+    "AgentStatus",
+    "AgentTier",
 ]

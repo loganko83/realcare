@@ -5,7 +5,7 @@ Aggregates all endpoint routers
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import health, reality, signals, contracts, auth
+from app.api.v1.endpoints import health, reality, signals, contracts, auth, agents, blockchain, payments
 
 api_router = APIRouter()
 
@@ -15,3 +15,6 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(reality.router, prefix="/reality", tags=["Reality Check"])
 api_router.include_router(signals.router, prefix="/signals", tags=["Owner Signals"])
 api_router.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
+api_router.include_router(agents.router, prefix="/agents", tags=["Agents (B2B)"])
+api_router.include_router(blockchain.router, prefix="/blockchain", tags=["Blockchain (DID/Xphere)"])
+api_router.include_router(payments.router, prefix="/payments", tags=["Payments"])
