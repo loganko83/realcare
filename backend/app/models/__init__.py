@@ -5,6 +5,7 @@ from app.models.reality_report import RealityReport, TransactionType
 from app.models.owner_signal import OwnerSignal, SignalInterest, PropertyType, SignalStatus
 from app.models.contract import Contract, TimelineTask, ContractType, ContractStatus
 from app.models.agent import Agent, AgentListing, AgentSignalResponse, AgentStatus, AgentTier
+from app.models.file import UploadedFile
 
 __all__ = [
     # Base
@@ -34,4 +35,6 @@ __all__ = [
     "AgentSignalResponse",
     "AgentStatus",
     "AgentTier",
+    # File
+    "UploadedFile",
 ]

@@ -87,6 +87,7 @@ class Contract(Base, UUIDMixin, TimestampMixin):
     # Relationships
     user = relationship("User", back_populates="contracts")
     timeline_tasks = relationship("TimelineTask", back_populates="contract")
+    documents = relationship("UploadedFile", back_populates="contract")
 
     def __repr__(self) -> str:
         return f"<Contract {self.id} - {self.contract_type.value}>"

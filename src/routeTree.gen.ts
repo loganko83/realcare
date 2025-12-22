@@ -24,8 +24,11 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CalculatorsRouteImport } from './routes/calculators'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentIndexRouteImport } from './routes/agent/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AgentRegisterRouteImport } from './routes/agent/register'
 import { Route as AgentListingsRouteImport } from './routes/agent/listings'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
 
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
@@ -102,6 +105,11 @@ const AgentIndexRoute = AgentIndexRouteImport.update({
   path: '/agent/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgentRegisterRoute = AgentRegisterRouteImport.update({
   id: '/agent/register',
   path: '/agent/register',
@@ -110,6 +118,16 @@ const AgentRegisterRoute = AgentRegisterRouteImport.update({
 const AgentListingsRoute = AgentListingsRouteImport.update({
   id: '/agent/listings',
   path: '/agent/listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAgentsRoute = AdminAgentsRouteImport.update({
+  id: '/admin/agents',
+  path: '/admin/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -128,8 +146,11 @@ export interface FileRoutesByFullPath {
   '/subscription': typeof SubscriptionRoute
   '/timeline': typeof TimelineRoute
   '/wallet': typeof WalletRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/agent/listings': typeof AgentListingsRoute
   '/agent/register': typeof AgentRegisterRoute
+  '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
 }
 export interface FileRoutesByTo {
@@ -147,8 +168,11 @@ export interface FileRoutesByTo {
   '/subscription': typeof SubscriptionRoute
   '/timeline': typeof TimelineRoute
   '/wallet': typeof WalletRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/agent/listings': typeof AgentListingsRoute
   '/agent/register': typeof AgentRegisterRoute
+  '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
 }
 export interface FileRoutesById {
@@ -167,8 +191,11 @@ export interface FileRoutesById {
   '/subscription': typeof SubscriptionRoute
   '/timeline': typeof TimelineRoute
   '/wallet': typeof WalletRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/agent/listings': typeof AgentListingsRoute
   '/agent/register': typeof AgentRegisterRoute
+  '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
 }
 export interface FileRouteTypes {
@@ -188,8 +215,11 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/timeline'
     | '/wallet'
+    | '/admin/agents'
+    | '/admin/users'
     | '/agent/listings'
     | '/agent/register'
+    | '/admin'
     | '/agent'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -207,8 +237,11 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/timeline'
     | '/wallet'
+    | '/admin/agents'
+    | '/admin/users'
     | '/agent/listings'
     | '/agent/register'
+    | '/admin'
     | '/agent'
   id:
     | '__root__'
@@ -226,8 +259,11 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/timeline'
     | '/wallet'
+    | '/admin/agents'
+    | '/admin/users'
     | '/agent/listings'
     | '/agent/register'
+    | '/admin/'
     | '/agent/'
   fileRoutesById: FileRoutesById
 }
@@ -246,8 +282,11 @@ export interface RootRouteChildren {
   SubscriptionRoute: typeof SubscriptionRoute
   TimelineRoute: typeof TimelineRoute
   WalletRoute: typeof WalletRoute
+  AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AgentListingsRoute: typeof AgentListingsRoute
   AgentRegisterRoute: typeof AgentRegisterRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   AgentIndexRoute: typeof AgentIndexRoute
 }
 
@@ -358,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agent/register': {
       id: '/agent/register'
       path: '/agent/register'
@@ -370,6 +416,20 @@ declare module '@tanstack/react-router' {
       path: '/agent/listings'
       fullPath: '/agent/listings'
       preLoaderRoute: typeof AgentListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/agents': {
+      id: '/admin/agents'
+      path: '/admin/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AdminAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -390,8 +450,11 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionRoute: SubscriptionRoute,
   TimelineRoute: TimelineRoute,
   WalletRoute: WalletRoute,
+  AdminAgentsRoute: AdminAgentsRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AgentListingsRoute: AgentListingsRoute,
   AgentRegisterRoute: AgentRegisterRoute,
+  AdminIndexRoute: AdminIndexRoute,
   AgentIndexRoute: AgentIndexRoute,
 }
 export const routeTree = rootRouteImport

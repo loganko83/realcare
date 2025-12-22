@@ -38,6 +38,13 @@ from app.schemas.contract import (
     ContractAnalysisRequest,
     ContractAnalysisResult,
 )
+from app.schemas.file import (
+    FileUploadResponse,
+    ContractDocumentUploadResponse,
+    FileListResponse,
+    FileDeleteResponse,
+    FileInfoResponse,
+)
 
 __all__ = [
     # User
@@ -75,4 +82,10 @@ __all__ = [
     "TimelineTaskUpdate",
     "ContractAnalysisRequest",
     "ContractAnalysisResult",
+    # File
+    "FileUploadResponse",
+    "ContractDocumentUploadResponse",
+    "FileListResponse",
+    "FileDeleteResponse",
+    "FileInfoResponse",
 ]

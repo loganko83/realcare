@@ -63,6 +63,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     reality_reports = relationship("RealityReport", back_populates="user")
     signals = relationship("OwnerSignal", back_populates="user")
     contracts = relationship("Contract", back_populates="user")
+    uploaded_files = relationship("UploadedFile", back_populates="user")
 
     def __repr__(self) -> str:
         return f"<User {self.email}>"

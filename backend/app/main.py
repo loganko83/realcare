@@ -12,6 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.core.database import init_db
 from app.api.v1.router import api_router
+from app.middleware.security import SecurityHeadersMiddleware, RequestValidationMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 
 settings = get_settings()
 logger = structlog.get_logger()
@@ -56,6 +58,27 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# Security headers middleware
+app.add_middleware(
+    SecurityHeadersMiddleware,
+    enable_hsts=not settings.DEBUG,  # Disable HSTS in development
+    csp_report_only=settings.DEBUG,  # Report-only CSP in development
+)
+
+# Request validation middleware
+app.add_middleware(
+    RequestValidationMiddleware,
+    max_body_size=10 * 1024 * 1024,  # 10MB
+)
+
+# Rate limiting middleware
+app.add_middleware(
+    RateLimitMiddleware,
+    default_limit=30,    # Anonymous users: 30 req/min
+    auth_limit=100,      # Authenticated users: 100 req/min
+    premium_limit=300,   # Premium users: 300 req/min
 )
 
 

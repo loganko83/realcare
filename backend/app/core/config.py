@@ -49,13 +49,44 @@ class Settings(BaseSettings):
     XPHERE_RPC_URL: str = "https://rpc.xphere.network"
     XPHERE_CHAIN_ID: int = 20250217
 
-    # Kakao API (for maps, social login)
+    # Kakao OAuth
+    KAKAO_CLIENT_ID: Optional[str] = None
+    KAKAO_CLIENT_SECRET: Optional[str] = None
     KAKAO_REST_API_KEY: Optional[str] = None
     KAKAO_JS_KEY: Optional[str] = None
 
-    # Naver API (for social login)
+    # Naver OAuth
     NAVER_CLIENT_ID: Optional[str] = None
     NAVER_CLIENT_SECRET: Optional[str] = None
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+
+    # Toss Payments
+    TOSS_CLIENT_KEY: Optional[str] = None
+    TOSS_SECRET_KEY: Optional[str] = None
+
+    # Naver Maps
+    NAVER_MAP_CLIENT_ID: Optional[str] = None
+
+    # Frontend URL (for OAuth redirects)
+    FRONTEND_URL: str = "https://trendy.storydot.kr"
+
+    # Email (SendGrid)
+    SENDGRID_API_KEY: Optional[str] = None
+    FROM_EMAIL: str = "noreply@realcare.kr"
+
+    # Push Notifications (Firebase)
+    FCM_SERVER_KEY: Optional[str] = None
+    FIREBASE_PROJECT_ID: Optional[str] = None
+
+    # File Storage (S3)
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+    AWS_REGION: str = "ap-northeast-2"
+    S3_BUCKET: str = "realcare-uploads"
+    UPLOAD_DIR: str = "/tmp/realcare-uploads"
 
     class Config:
         env_file = ".env"
