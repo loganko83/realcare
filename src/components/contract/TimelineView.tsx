@@ -1,9 +1,10 @@
 /**
  * Timeline View Component
  * Displays contract move-in timeline with progress tracking
+ * Supports both list view and category-grouped view
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Check,
   Clock,
@@ -12,8 +13,10 @@ import {
   ChevronUp,
   ExternalLink,
   Phone,
+  List,
+  LayoutGrid,
 } from 'lucide-react';
-import type { TimelineItem, Contract } from '../../types/contract';
+import type { TimelineItem, Contract, TaskCategory } from '../../types/contract';
 import {
   useUpdateTimelineItem,
   useUpdateSubtask,
@@ -26,6 +29,7 @@ import {
   getOverdueTasks,
   getCriticalTasks,
 } from '../../lib/utils/timelineGenerator';
+import { TimelineCategorySection } from './TimelineCategorySection';
 
 // Dynamic icon component based on category
 function CategoryIcon({ category, size = 18 }: { category: string; size?: number }) {
@@ -51,9 +55,26 @@ interface TimelineViewProps {
   onRefresh?: () => void;
 }
 
+// Category order for consistent display
+const CATEGORY_ORDER: TaskCategory[] = [
+  'documents',
+  'loan',
+  'interior',
+  'finance',
+  'moving',
+  'cleaning',
+  'inspection',
+  'utilities',
+  'move_in',
+];
+
 export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'category'>('category');
+  const [expandedCategories, setExpandedCategories] = useState<Set<TaskCategory>>(
+    new Set(CATEGORY_ORDER) // All categories expanded by default
+  );
 
   const { mutate: updateItem } = useUpdateTimelineItem();
   const { mutate: updateSubtask } = useUpdateSubtask();
@@ -61,6 +82,52 @@ export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
   const progress = getTimelineProgress(contract.timeline);
   const overdue = getOverdueTasks(contract.timeline);
   const critical = getCriticalTasks(contract.timeline);
+
+  // Group tasks by category
+  const tasksByCategory = useMemo(() => {
+    const grouped = new Map<TaskCategory, TimelineItem[]>();
+
+    // Initialize all categories
+    CATEGORY_ORDER.forEach(cat => grouped.set(cat, []));
+
+    // Group filtered items
+    contract.timeline
+      .filter(item => {
+        if (filter === 'pending') return item.status !== 'completed' && item.status !== 'skipped';
+        if (filter === 'completed') return item.status === 'completed' || item.status === 'skipped';
+        return true;
+      })
+      .forEach(item => {
+        const existing = grouped.get(item.category) || [];
+        existing.push(item);
+        grouped.set(item.category, existing);
+      });
+
+    // Sort items within each category by date
+    grouped.forEach((items, category) => {
+      items.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      grouped.set(category, items);
+    });
+
+    return grouped;
+  }, [contract.timeline, filter]);
+
+  // Get categories that have items
+  const activeCategories = useMemo(() => {
+    return CATEGORY_ORDER.filter(cat => (tasksByCategory.get(cat)?.length || 0) > 0);
+  }, [tasksByCategory]);
+
+  const toggleCategory = (category: TaskCategory) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
 
   const filteredTimeline = contract.timeline.filter(item => {
     if (filter === 'pending') return item.status !== 'completed' && item.status !== 'skipped';
@@ -170,28 +237,255 @@ export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
         )}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
-        {[
-          { id: 'all', label: 'All' },
-          { id: 'pending', label: 'Pending' },
-          { id: 'completed', label: 'Done' },
-        ].map((tab) => (
+      {/* Filter and View Toggle */}
+      <div className="flex gap-3">
+        {/* Filter Tabs */}
+        <div className="flex-1 flex gap-2 bg-gray-100 p-1 rounded-xl">
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'pending', label: 'Pending' },
+            { id: 'completed', label: 'Done' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id as typeof filter)}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${
+                filter === tab.id
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* View Mode Toggle */}
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
           <button
-            key={tab.id}
-            onClick={() => setFilter(tab.id as typeof filter)}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${
-              filter === tab.id
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded-lg transition ${
+              viewMode === 'list'
                 ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
+                : 'text-slate-400 hover:text-slate-600'
             }`}
+            title="List view"
           >
-            {tab.label}
+            <List size={18} />
           </button>
-        ))}
+          <button
+            onClick={() => setViewMode('category')}
+            className={`p-2 rounded-lg transition ${
+              viewMode === 'category'
+                ? 'bg-white text-slate-800 shadow-sm'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+            title="Category view"
+          >
+            <LayoutGrid size={18} />
+          </button>
+        </div>
       </div>
 
-      {/* Timeline Items */}
+      {/* Category View */}
+      {viewMode === 'category' && (
+        <div className="space-y-4">
+          {activeCategories.map(category => {
+            const categoryItems = tasksByCategory.get(category) || [];
+            return (
+              <TimelineCategorySection
+                key={category}
+                category={category}
+                items={categoryItems}
+                isExpanded={expandedCategories.has(category)}
+                onToggle={() => toggleCategory(category)}
+              >
+                {categoryItems.map((item) => {
+                  const expanded = expandedItems.has(item.id);
+                  const itemOverdue = isOverdue(item);
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`bg-white rounded-xl border transition ${
+                        itemOverdue ? 'border-red-300 bg-red-50' :
+                        item.status === 'completed' ? 'border-green-200 bg-green-50/50' :
+                        item.status === 'in_progress' ? 'border-blue-300' :
+                        'border-gray-200'
+                      }`}
+                    >
+                      <button
+                        onClick={() => toggleExpand(item.id)}
+                        className="w-full p-3 text-left"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Status Indicator */}
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                            item.status === 'completed' ? 'bg-green-100 text-green-600' :
+                            item.status === 'in_progress' ? 'bg-blue-100 text-blue-600' :
+                            itemOverdue ? 'bg-red-100 text-red-600' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {item.status === 'completed' ? (
+                              <Check size={16} />
+                            ) : (
+                              <Clock size={16} />
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                                item.dDay === 0 ? 'bg-brand-600 text-white' :
+                                item.dDay < 0 ? 'bg-slate-700 text-white' :
+                                'bg-gray-200 text-gray-700'
+                              }`}>
+                                {formatDDay(item.dDay)}
+                              </span>
+                              <span className="text-xs text-slate-400">{item.date}</span>
+                              {getPriorityBadge(item.priority)}
+                              {itemOverdue && (
+                                <span className="text-xs text-red-600 font-bold">OVERDUE</span>
+                              )}
+                            </div>
+
+                            <h3 className={`font-medium text-sm ${
+                              item.status === 'completed' ? 'text-slate-500 line-through' : 'text-slate-800'
+                            }`}>
+                              {item.title}
+                            </h3>
+
+                            {item.subtasks && item.subtasks.length > 0 && (
+                              <span className="text-xs text-slate-400 mt-1 block">
+                                {item.subtasks.filter(s => s.completed).length}/{item.subtasks.length} subtasks
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Expand Icon */}
+                          <div className="text-slate-400">
+                            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Expanded Content */}
+                      {expanded && (
+                        <div className="px-3 pb-3 space-y-3 animate-fade-in">
+                          <p className="text-sm text-slate-500 ml-11">{item.description}</p>
+
+                          {/* Subtasks */}
+                          {item.subtasks && item.subtasks.length > 0 && (
+                            <div className="ml-11 space-y-1">
+                              {item.subtasks.map((subtask) => (
+                                <label
+                                  key={subtask.id}
+                                  className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-50 cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={subtask.completed}
+                                    onChange={(e) => handleSubtaskToggle(item, subtask.id, e.target.checked)}
+                                    className="w-4 h-4 rounded text-brand-600"
+                                  />
+                                  <span className={`text-sm ${subtask.completed ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+                                    {subtask.title}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Partner Service */}
+                          {item.partnerService && item.partnerService.name && (
+                            <div className="ml-11 p-2 bg-brand-50 rounded-lg border border-brand-100">
+                              <p className="text-xs font-bold text-brand-700 mb-1">Recommended Partner</p>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-sm text-slate-800">{item.partnerService.name}</p>
+                                  {item.partnerService.discount && (
+                                    <p className="text-xs text-brand-600">{item.partnerService.discount}</p>
+                                  )}
+                                </div>
+                                <div className="flex gap-1">
+                                  {item.partnerService.phone && (
+                                    <a
+                                      href={`tel:${item.partnerService.phone}`}
+                                      className="p-1.5 bg-white rounded border border-gray-200 text-slate-600 hover:bg-gray-50"
+                                    >
+                                      <Phone size={14} />
+                                    </a>
+                                  )}
+                                  {item.partnerService.url && (
+                                    <a
+                                      href={item.partnerService.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-1.5 bg-white rounded border border-gray-200 text-slate-600 hover:bg-gray-50"
+                                    >
+                                      <ExternalLink size={14} />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="ml-11 flex gap-2">
+                            {item.status !== 'completed' && (
+                              <>
+                                {item.status !== 'in_progress' && (
+                                  <button
+                                    onClick={() => handleStatusChange(item, 'in_progress')}
+                                    className="flex-1 py-1.5 bg-blue-100 text-blue-700 font-medium rounded-lg hover:bg-blue-200 transition text-xs"
+                                  >
+                                    Start
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleStatusChange(item, 'completed')}
+                                  className="flex-1 py-1.5 bg-green-100 text-green-700 font-medium rounded-lg hover:bg-green-200 transition text-xs"
+                                >
+                                  Complete
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(item, 'skipped')}
+                                  className="py-1.5 px-2 bg-gray-100 text-gray-600 font-medium rounded-lg hover:bg-gray-200 transition text-xs"
+                                >
+                                  Skip
+                                </button>
+                              </>
+                            )}
+                            {item.status === 'completed' && (
+                              <button
+                                onClick={() => handleStatusChange(item, 'pending')}
+                                className="py-1.5 px-3 bg-gray-100 text-gray-600 font-medium rounded-lg hover:bg-gray-200 transition text-xs"
+                              >
+                                Reopen
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </TimelineCategorySection>
+            );
+          })}
+
+          {activeCategories.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-slate-500">No tasks match the current filter</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* List View - Timeline Items */}
+      {viewMode === 'list' && (
       <div className="space-y-3">
         {filteredTimeline.map((item, index) => {
           const expanded = expandedItems.has(item.id);
@@ -376,12 +670,13 @@ export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
             </div>
           );
         })}
-      </div>
 
-      {filteredTimeline.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-slate-500">No tasks match the current filter</p>
-        </div>
+        {filteredTimeline.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-slate-500">No tasks match the current filter</p>
+          </div>
+        )}
+      </div>
       )}
     </div>
   );

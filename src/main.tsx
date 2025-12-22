@@ -4,7 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
+import { initSentry } from './lib/sentry';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthProvider } from './lib/contexts/AuthContext';
 import './index.css';
+
+// Initialize Sentry error tracking
+initSentry();
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -47,9 +53,13 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

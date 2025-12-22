@@ -2,9 +2,19 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState, useRef } from 'react';
 import { FileText, Check, AlertTriangle, Loader2, X, Camera, Image as ImageIcon, Save, CheckCircle, File, Share2, AlignLeft, Download, RefreshCw } from 'lucide-react';
 import { useContractAnalysis, useSaveAnalysis } from '../lib/hooks/useContractAnalysis';
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { useTranslation } from '../lib/i18n/useTranslation';
+
+// Lazy load PDF libraries (saves ~550KB from initial bundle)
+const loadPdfLibraries = async () => {
+  const [jspdfModule, html2canvasModule] = await Promise.all([
+    import('jspdf'),
+    import('html2canvas')
+  ]);
+  return {
+    jsPDF: jspdfModule.jsPDF,
+    html2canvas: html2canvasModule.default
+  };
+};
 
 export const Route = createFileRoute('/contract')({
   component: ContractPage,
@@ -127,30 +137,80 @@ function ContractPage() {
   };
 
   const handleDownloadPdf = async () => {
-    const element = document.getElementById('analysis-report-content');
-    if (!element) return;
+    if (!analysis) return;
 
     setDownloadingPdf(true);
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
+      // Dynamically load PDF library
+      const jspdfModule = await import('jspdf');
+      const jsPDF = jspdfModule.jsPDF;
 
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
 
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const { addPdfHeader, addPdfFooter, addSectionHeader, addTextContent, addRiskItem, PDF_DIMENSIONS } =
+        await import('../lib/utils/pdfBranding');
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const { margin, contentWidth } = PDF_DIMENSIONS;
+
+      // Add branded header
+      let y = addPdfHeader(pdf, {
+        title: 'Contract Safety Analysis',
+        subtitle: selectedFile ? `Analyzed: ${selectedFile.name}` : 'Text Input Analysis',
+        reportType: 'contract',
+        date: new Date(),
+      });
+
+      // Summary section
+      y = addSectionHeader(pdf, 'Summary', y, 'primary');
+      y = addTextContent(pdf, analysis.summary, y, { fontSize: 10 });
+      y += 8;
+
+      // Risks section
+      if (analysis.risks.length > 0) {
+        y = addSectionHeader(pdf, `Risk Analysis (${analysis.risks.length} items found)`, y,
+          analysis.risks.some(r => r.severity === 'High') ? 'danger' : 'warning');
+        y += 3;
+
+        for (let i = 0; i < Math.min(analysis.risks.length, 5); i++) {
+          // Check if we need a new page
+          if (y > 250) {
+            pdf.addPage();
+            y = margin.top;
+          }
+          y = addRiskItem(pdf, analysis.risks[i], y, i);
+        }
+
+        if (analysis.risks.length > 5) {
+          y += 3;
+          y = addTextContent(pdf, `+ ${analysis.risks.length - 5} more risks. See full report for details.`, y, {
+            fontSize: 9,
+            color: [100, 116, 139],
+            fontStyle: 'italic',
+          });
+        }
+      } else {
+        y = addSectionHeader(pdf, 'Risk Analysis', y, 'success');
+        y = addTextContent(pdf, 'No significant risks detected in this contract. The document appears to use standard clauses.', y, {
+          fontSize: 10,
+          color: [16, 185, 129],
+        });
+      }
+
+      // Disclaimer
+      y += 10;
+      y = addTextContent(pdf,
+        'IMPORTANT: This AI-generated analysis is for reference only. Always consult with a qualified real estate attorney or professional before making any decisions based on this report.',
+        y,
+        { fontSize: 8, color: [148, 163, 184], fontStyle: 'italic' }
+      );
+
+      // Add branded footer
+      addPdfFooter(pdf);
+
       pdf.save(`realcare-contract-analysis-${Date.now()}.pdf`);
     } catch (error) {
       console.error("PDF generation failed", error);

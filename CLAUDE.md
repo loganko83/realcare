@@ -19,8 +19,9 @@ RealCare is a Korean real estate care service application that helps users with 
 - **State Management**: TanStack Query v5
 - **Forms**: TanStack Form + Zod validation
 - **AI**: Google Gemini API (`@google/generative-ai`) with File Search RAG
-- **Charts**: Recharts
-- **PDF Export**: jsPDF + html2canvas
+- **Charts**: Recharts (lazy-loaded)
+- **PDF Export**: jsPDF + html2canvas (lazy-loaded)
+- **Error Tracking**: Sentry (`@sentry/react`)
 - **Icons**: lucide-react
 - **Styling**: Tailwind CSS v4 (PostCSS build)
 
@@ -38,9 +39,12 @@ npm run preview  # Preview production build
 Create `.env.local` with:
 ```
 GEMINI_API_KEY=your_api_key_here
+VITE_SENTRY_DSN=your_sentry_dsn_here    # Optional: for error tracking
+VITE_APP_VERSION=1.0.0                   # Optional: for release tracking
 ```
 
-The API key is exposed via Vite's `define` config as `process.env.API_KEY` and `process.env.GEMINI_API_KEY`.
+The Gemini API key is exposed via Vite's `define` config as `process.env.API_KEY` and `process.env.GEMINI_API_KEY`.
+Sentry configuration is optional - if no DSN is provided, error tracking is disabled.
 
 ## Architecture
 
@@ -60,6 +64,8 @@ src/
 │   └── settings.tsx            # Settings (/settings)
 ├── components/
 │   ├── layout/Navigation.tsx   # Bottom tab navigation with router links
+│   ├── charts/LazyCharts.tsx   # Lazy-loaded recharts components
+│   ├── ErrorBoundary.tsx       # Global error boundary with Sentry
 │   ├── realityCheck/           # Reality check form and results
 │   ├── ownerSignal/            # Signal creation and listing
 │   └── contract/               # Contract forms and timeline
@@ -74,7 +80,8 @@ src/
 │   ├── hooks/                  # Custom hooks (useRealityCheck, useContractAnalysis)
 │   ├── utils/                  # Calculators (dsr.ts, taxCalculator.ts, realityScore.ts)
 │   ├── constants/              # regulations.ts, partnerServices.ts
-│   └── i18n/                   # Translation system (ko/en)
+│   ├── i18n/                   # Translation system (ko/en)
+│   └── sentry.ts               # Sentry error tracking initialization
 ├── stores/                     # localStorage-based stores
 │   └── languageStore.ts
 └── types/                      # TypeScript interfaces

@@ -13,11 +13,13 @@ import {
   Check,
   ChevronLeft,
   Loader2,
+  Map as MapIcon,
 } from 'lucide-react';
 import { useCreateSignal } from '../../services/ownerSignal';
 import { SEOUL_DISTRICTS, GYEONGGI_CITIES } from '../../lib/constants/regulations';
 import { formatKRW } from '../../lib/utils/dsr';
 import type { CreateSignalInput } from '../../types/ownerSignal';
+import { MapSelectorInline } from './MapSelector';
 
 interface CreateSignalFormProps {
   onSuccess?: () => void;
@@ -35,6 +37,8 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
   const [area, setArea] = useState(84);
   const [floor, setFloor] = useState(10);
   const [buildingYear, setBuildingYear] = useState(2015);
+  const [useMapSelection, setUseMapSelection] = useState(false);
+  const [mapLocation, setMapLocation] = useState<{ address: string; district: string; lat: number; lng: number } | null>(null);
 
   const [signalType, setSignalType] = useState<'sale' | 'jeonse' | 'monthly'>('sale');
   const [minPrice, setMinPrice] = useState(800); // in millions
@@ -160,13 +164,59 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
 
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Full Address</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="e.g., 123 Gangnam-daero, Gangnam-gu"
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
-                />
+
+                {/* Toggle between text input and map */}
+                <div className="flex gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setUseMapSelection(false)}
+                    className={`flex-1 py-2 text-xs font-medium rounded-lg border transition ${
+                      !useMapSelection
+                        ? 'border-brand-500 bg-brand-50 text-brand-700'
+                        : 'border-gray-200 text-slate-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    Type Address
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUseMapSelection(true)}
+                    className={`flex-1 py-2 text-xs font-medium rounded-lg border transition flex items-center justify-center gap-1 ${
+                      useMapSelection
+                        ? 'border-brand-500 bg-brand-50 text-brand-700'
+                        : 'border-gray-200 text-slate-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    <MapIcon size={14} />
+                    Select on Map
+                  </button>
+                </div>
+
+                {!useMapSelection ? (
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="e.g., 123 Gangnam-daero, Gangnam-gu"
+                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
+                  />
+                ) : (
+                  <MapSelectorInline
+                    value={mapLocation ? { address: mapLocation.address, lat: mapLocation.lat, lng: mapLocation.lng } : null}
+                    onChange={(loc) => {
+                      setMapLocation(loc);
+                      setAddress(loc.address);
+                      // Try to match district to our predefined list
+                      const matchedDistrict = allRegions.find(r =>
+                        loc.district.includes(r.name) || r.name.includes(loc.district)
+                      );
+                      if (matchedDistrict) {
+                        setDistrict(matchedDistrict.id);
+                      }
+                    }}
+                  />
+                )}
+
                 <p className="text-xs text-slate-400 mt-1">
                   Address will be partially masked for privacy
                 </p>

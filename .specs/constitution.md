@@ -67,10 +67,20 @@ Knowledge Store: FileSearchStore for regulations and contracts
 
 ### Backend (Planned)
 ```yaml
-Runtime: Node.js or FastAPI (Python)
-Database: PostgreSQL
+Runtime: FastAPI (Python 3.11+)
+Database: PostgreSQL + SQLAlchemy async
 Cache: Redis
-Auth: JWT
+Auth: JWT + Social (Kakao, Naver)
+API: RESTful with OpenAPI
+```
+
+### Blockchain & DID (Planned)
+```yaml
+Blockchain: Xphere (EVM-compatible, chainId: 20250217)
+DID Service: DID BaaS (https://trendy.storydot.kr/did-baas)
+SDK: @did-baas/sdk (npm)
+Standards: W3C DID Core 1.0, W3C VC Data Model 1.1
+Features: Verifiable Credentials, ZKP, BBS+ Signatures
 ```
 
 ## Development Standards

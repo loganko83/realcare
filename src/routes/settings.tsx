@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
-import { User, Settings as SettingsIcon, Plus, Calendar, Trash2, Bell, AlertCircle, CreditCard, Globe } from 'lucide-react';
+import { User, Settings as SettingsIcon, Plus, Calendar, Trash2, Bell, AlertCircle, CreditCard, Globe, HelpCircle } from 'lucide-react';
 import { useTranslation } from '../lib/i18n/useTranslation';
+import { OnboardingTutorial } from '../components/onboarding/OnboardingTutorial';
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
@@ -23,6 +24,7 @@ function SettingsPage() {
   const [contracts, setContracts] = useState<ContractHistory[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const [newContract, setNewContract] = useState<Partial<ContractHistory>>({
     type: 'jeonse',
@@ -153,7 +155,7 @@ function SettingsPage() {
       </div>
 
       {/* Language Toggle */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center">
@@ -183,6 +185,31 @@ function SettingsPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Tutorial Replay */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <button
+          onClick={() => setShowTutorial(true)}
+          className="w-full flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+              <HelpCircle size={20} className="text-slate-600" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-slate-800">
+                {lang === 'ko' ? '튜토리얼 다시 보기' : 'Replay Tutorial'}
+              </h3>
+              <p className="text-xs text-slate-500">
+                {lang === 'ko' ? '앱 기능 안내 보기' : 'View app feature guide'}
+              </p>
+            </div>
+          </div>
+          <div className="text-slate-400">
+            <HelpCircle size={16} />
+          </div>
+        </button>
       </div>
 
       {/* Profile Card */}
@@ -394,6 +421,11 @@ function SettingsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Tutorial Modal */}
+      {showTutorial && (
+        <OnboardingTutorial onComplete={() => setShowTutorial(false)} />
       )}
     </div>
   );

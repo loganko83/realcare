@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Plus, List, Send, X } from 'lucide-react';
 import { SignalList } from '../components/ownerSignal/SignalList';
 import { CreateSignalForm } from '../components/ownerSignal/CreateSignalForm';
+import { ContactRequestModal } from '../components/ownerSignal/ContactRequestModal';
 import { useMySignals } from '../services/ownerSignal';
 import type { OwnerSignal } from '../types/ownerSignal';
 import { formatKRW } from '../lib/utils/dsr';
@@ -21,6 +22,7 @@ function SignalsPage() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'browse' | 'my' | 'create'>('browse');
   const [selectedSignal, setSelectedSignal] = useState<OwnerSignal | null>(null);
+  const [contactSignal, setContactSignal] = useState<OwnerSignal | null>(null);
 
   const { data: mySignals, isLoading: mySignalsLoading } = useMySignals();
 
@@ -235,7 +237,13 @@ function SignalsPage() {
                 </span>
               </div>
 
-              <button className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition">
+              <button
+                onClick={() => {
+                  setContactSignal(selectedSignal);
+                  setSelectedSignal(null);
+                }}
+                className="w-full bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition"
+              >
                 {t('signals_send_request')}
               </button>
 
@@ -245,6 +253,17 @@ function SignalsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Contact Request Modal */}
+      {contactSignal && (
+        <ContactRequestModal
+          signal={contactSignal}
+          onClose={() => setContactSignal(null)}
+          onSuccess={() => {
+            // Optionally refresh data or show notification
+          }}
+        />
       )}
     </div>
   );

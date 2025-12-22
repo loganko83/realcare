@@ -3,7 +3,7 @@
  * Enhanced financial feasibility calculator with proper score calculation
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Calculator,
   MapPin,
@@ -14,11 +14,17 @@ import {
   CheckCircle,
   Info,
   Loader2,
+  GitCompare,
+  ArrowLeft,
+  Download,
 } from 'lucide-react';
 import { useRealityCheck } from '../../lib/hooks/useRealityCheck';
 import { SEOUL_DISTRICTS, GYEONGGI_CITIES } from '../../lib/constants/regulations';
 import { formatKRW } from '../../lib/utils/dsr';
-import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '../charts/LazyCharts';
+import { ScenarioComparison } from './ScenarioComparison';
+import { ShareButton } from './ShareButton';
+import { parseShareFromUrl, type ShareableState } from '../../lib/utils/shareUtils';
 
 interface RealityCheckFormProps {
   onComplete?: (result: ReturnType<typeof useRealityCheck>['data']) => void;
@@ -27,6 +33,8 @@ interface RealityCheckFormProps {
 export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
   const [step, setStep] = useState(1);
   const [showResult, setShowResult] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   // Form state
   const [region, setRegion] = useState('gangnam');
@@ -41,6 +49,33 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
   const selectedRegion = allRegions.find(r => r.id === region);
 
   const { mutate: calculateScore, data: result, isPending: loading } = useRealityCheck();
+
+  // Restore state from URL if shared
+  useEffect(() => {
+    const sharedState = parseShareFromUrl();
+    if (sharedState) {
+      setRegion(sharedState.region);
+      setTargetPrice(sharedState.targetPrice);
+      setAnnualIncome(sharedState.annualIncome);
+      setCashAvailable(sharedState.cashAvailable);
+      setExistingDebt(sharedState.existingDebt);
+      setIsFirstHome(sharedState.isFirstHome);
+      setHouseCount(sharedState.houseCount);
+      // Clear the URL parameter
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // Get shareable state
+  const shareableState: ShareableState = {
+    region,
+    targetPrice,
+    annualIncome,
+    cashAvailable,
+    existingDebt,
+    isFirstHome,
+    houseCount,
+  };
 
   const handleCalculate = () => {
     calculateScore(
@@ -82,7 +117,147 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!result) return;
+
+    setDownloadingPdf(true);
+    try {
+      const jspdfModule = await import('jspdf');
+      const jsPDF = jspdfModule.jsPDF;
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const { addPdfHeader, addPdfFooter, addSectionHeader, addTextContent, addScoreDisplay, PDF_DIMENSIONS } =
+        await import('../../lib/utils/pdfBranding');
+
+      const { margin } = PDF_DIMENSIONS;
+
+      // Add branded header
+      let y = addPdfHeader(pdf, {
+        title: 'Reality Check Report',
+        subtitle: `${selectedRegion?.name || region} - ${new Intl.NumberFormat('ko-KR').format(targetPrice)}M KRW`,
+        reportType: 'reality',
+        date: new Date(),
+      });
+
+      // Score display
+      y = addScoreDisplay(pdf, result.score, `Grade ${result.grade}`, y);
+
+      // Score breakdown
+      y = addSectionHeader(pdf, 'Score Breakdown', y, 'primary');
+      y += 2;
+
+      const breakdowns = [
+        { label: 'LTV Score', value: `${result.breakdown.ltvScore}/25` },
+        { label: 'DSR Score', value: `${result.breakdown.dsrScore}/25` },
+        { label: 'Cash Gap Score', value: `${result.breakdown.cashGapScore}/25` },
+        { label: 'Stability Score', value: `${result.breakdown.stabilityScore}/25` },
+      ];
+
+      breakdowns.forEach((item, idx) => {
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text(item.label, margin.left + (idx % 2) * 85, y);
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(item.value, margin.left + (idx % 2) * 85 + 35, y);
+        pdf.setFont('helvetica', 'normal');
+        if (idx % 2 === 1) y += 7;
+      });
+      y += 10;
+
+      // Financial analysis
+      y = addSectionHeader(pdf, 'Financial Analysis', y, 'primary');
+      y += 2;
+
+      const financialData = [
+        { label: 'Target Property', value: new Intl.NumberFormat('ko-KR').format(result.analysis.targetPrice) + ' KRW' },
+        { label: 'Max Loan (LTV)', value: new Intl.NumberFormat('ko-KR').format(result.analysis.maxLoanByLTV) + ' KRW' },
+        { label: 'Max Loan (DSR Limited)', value: new Intl.NumberFormat('ko-KR').format(result.analysis.maxLoanByDSR) + ' KRW' },
+        { label: 'Actual Max Loan', value: new Intl.NumberFormat('ko-KR').format(result.analysis.maxLoanAmount) + ' KRW' },
+        { label: 'Required Cash', value: new Intl.NumberFormat('ko-KR').format(result.analysis.requiredCash) + ' KRW' },
+        { label: 'Monthly Payment', value: new Intl.NumberFormat('ko-KR').format(result.analysis.monthlyRepayment) + ' KRW' },
+        { label: 'DSR Ratio', value: result.analysis.dsrPercentage.toFixed(1) + '%' },
+      ];
+
+      financialData.forEach(item => {
+        pdf.setFontSize(9);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text(item.label, margin.left, y);
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(item.value, margin.left + 100, y, { align: 'right' });
+        pdf.setFont('helvetica', 'normal');
+        y += 6;
+      });
+      y += 8;
+
+      // Risks
+      if (result.risks.length > 0) {
+        y = addSectionHeader(pdf, `Risk Factors (${result.risks.length})`, y, 'warning');
+        y += 3;
+
+        result.risks.slice(0, 4).forEach((risk, idx) => {
+          const riskColor: [number, number, number] =
+            risk.type === 'critical' ? [239, 68, 68] :
+            risk.type === 'warning' ? [245, 158, 11] :
+            [59, 130, 246];
+
+          pdf.setFontSize(9);
+          pdf.setTextColor(...riskColor);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`${idx + 1}. ${risk.title}`, margin.left, y);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(71, 85, 105);
+          y += 5;
+          const lines = pdf.splitTextToSize(risk.message, 160);
+          pdf.text(lines.slice(0, 2), margin.left + 5, y);
+          y += lines.slice(0, 2).length * 4 + 4;
+        });
+      }
+
+      // Add branded footer
+      addPdfFooter(pdf);
+
+      pdf.save(`realcare-reality-check-${Date.now()}.pdf`);
+    } catch (error) {
+      console.error("PDF generation failed", error);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
   if (showResult && result) {
+    // Show scenario comparison view
+    if (showComparison) {
+      return (
+        <div className="space-y-4 animate-fade-in">
+          <button
+            onClick={() => setShowComparison(false)}
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800"
+          >
+            <ArrowLeft size={16} />
+            Back to Results
+          </button>
+          <ScenarioComparison
+            baseInput={{
+              region,
+              targetPrice: targetPrice * 1000000,
+              annualIncome: annualIncome * 1000000,
+              cashAvailable: cashAvailable * 1000000,
+              existingDebt: existingDebt * 1000000,
+              isFirstHome,
+              houseCount,
+            }}
+          />
+        </div>
+      );
+    }
+
     const chartData = [{
       name: 'Score',
       value: result.score,
@@ -95,12 +270,15 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg text-slate-800">Reality Check Result</h2>
-            <span
-              className="text-2xl font-bold px-3 py-1 rounded-lg"
-              style={{ color: getGradeColor(result.grade), backgroundColor: `${getGradeColor(result.grade)}15` }}
-            >
-              Grade {result.grade}
-            </span>
+            <div className="flex items-center gap-2">
+              <ShareButton state={shareableState} score={result.score} />
+              <span
+                className="text-2xl font-bold px-3 py-1 rounded-lg"
+                style={{ color: getGradeColor(result.grade), backgroundColor: `${getGradeColor(result.grade)}15` }}
+              >
+                Grade {result.grade}
+              </span>
+            </div>
           </div>
 
           <div className="h-48 w-full relative">
@@ -233,12 +411,32 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowResult(false)}
-          className="w-full py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition"
-        >
-          Calculate Again
-        </button>
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowResult(false)}
+              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition"
+            >
+              Calculate Again
+            </button>
+            <button
+              onClick={() => setShowComparison(true)}
+              className="flex-1 py-3 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 transition flex items-center justify-center gap-2"
+            >
+              <GitCompare size={18} />
+              Compare Scenarios
+            </button>
+          </div>
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+            className="w-full py-3 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {downloadingPdf ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
+            {downloadingPdf ? 'Generating PDF...' : 'Download Report (PDF)'}
+          </button>
+        </div>
       </div>
     );
   }

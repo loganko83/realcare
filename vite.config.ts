@@ -38,9 +38,9 @@ export default defineConfig(({ mode }) => {
                 '@tanstack/react-router',
                 '@tanstack/react-form',
               ],
-              'vendor-charts': ['recharts', 'd3-shape', 'd3-scale', 'd3-interpolate'],
-              'vendor-jspdf': ['jspdf'],
-              'vendor-html2canvas': ['html2canvas'],
+              // Charts and PDF libraries are now dynamically imported
+              // - recharts: loaded on /calculators route
+              // - jspdf + html2canvas: loaded only when PDF export is triggered
               'vendor-gemini': ['@google/generative-ai'],
             },
           },

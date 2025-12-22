@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell } from '../components/charts/LazyCharts';
 import { useFinancialAdvice } from '../lib/hooks/useFinancialAdvice';
 import { Loader2, Calculator, Building2, Landmark, Coins, Info, Target } from 'lucide-react';
 import { RealityCheckForm } from '../components/realityCheck/RealityCheckForm';
