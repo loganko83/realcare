@@ -29,6 +29,12 @@ export default defineConfig(({ mode }) => {
         }
       },
       build: {
+        target: 'esnext',
+        minify: 'esbuild',
+        cssCodeSplit: true,
+        modulePreload: {
+          polyfill: true,
+        },
         rollupOptions: {
           output: {
             manualChunks: {
@@ -43,6 +49,9 @@ export default defineConfig(({ mode }) => {
               // - jspdf + html2canvas: loaded only when PDF export is triggered
               'vendor-gemini': ['@google/generative-ai'],
             },
+          },
+          treeshake: {
+            preset: 'recommended',
           },
         },
       },

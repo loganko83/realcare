@@ -122,8 +122,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-// Sentry's error boundary wrapper for additional features
-export const SentryErrorBoundary = Sentry.withErrorBoundary(ErrorBoundary, {
-  showDialog: false, // Set to true to show Sentry's feedback dialog
-});

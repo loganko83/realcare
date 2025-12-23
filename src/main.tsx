@@ -1,16 +1,25 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
-import { initSentry } from './lib/sentry';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './lib/contexts/AuthContext';
 import './index.css';
 
-// Initialize Sentry error tracking
-initSentry();
+// Lazy load devtools (only in development)
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import('@tanstack/react-query-devtools').then((mod) => ({
+        default: mod.ReactQueryDevtools,
+      }))
+    )
+  : () => null;
+
+// Initialize Sentry lazily (after initial render)
+if (import.meta.env.PROD) {
+  import('./lib/sentry').then(({ initSentry }) => initSentry());
+}
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -58,7 +67,11 @@ root.render(
         <AuthProvider>
           <RouterProvider router={router} />
         </AuthProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {import.meta.env.DEV && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        )}
       </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>
