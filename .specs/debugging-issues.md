@@ -1,17 +1,19 @@
 # RealCare Debugging Issues Report
 
 > Generated: 2024-12-21
-> Updated: 2024-12-21 (E2E Tests Completed)
+> Updated: 2025-12-23 (Full System Audit)
 
 ## Executive Summary
 
 | Category | Status | Issues Found |
 |----------|--------|--------------|
 | D1: Infrastructure | PASS | 2 (resolved) |
-| D2: Frontend Runtime | PASS | 0 |
-| D3: API & Services | PASS | 0 |
+| D2: Frontend Runtime | FAIL | 189 TypeScript errors |
+| D3: API & Services | WARN | Schema mismatch |
 | D4: UI/UX | PASS | 0 |
 | D5: Performance | PASS | 2 (resolved) |
+| D6: Security | CRITICAL | 1 (SECRET_KEY) |
+| D7: OAuth | WARN | 2 pending configs |
 
 ### E2E Test Results (Playwright)
 - **Total Tests**: 50 (25 desktop + 25 mobile)
@@ -252,3 +254,166 @@ curl -sI https://trendy.storydot.kr/real/assets/vendor-react-*.js | grep -i cach
 # Check Lighthouse (requires npx)
 npx lighthouse https://trendy.storydot.kr/real/ --output=html --output-path=./lighthouse-report.html
 ```
+
+---
+
+## 2025-12-23 Full System Audit
+
+### CRITICAL: Security Issue - Default SECRET_KEY
+
+**Severity**: CRITICAL
+**Status**: OPEN
+
+The JWT secret key is using the default value:
+```python
+# backend/app/core/config.py:37
+SECRET_KEY: str = "your-secret-key-change-in-production"
+```
+
+**Impact**: All JWT tokens can be forged by anyone who knows this default value.
+
+**Fix Required**:
+```bash
+# Generate secure key
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# Add to ecosystem.config.cjs env section
+SECRET_KEY: "generated-secure-key-here"
+```
+
+---
+
+### HIGH: 189 TypeScript Errors
+
+**Severity**: HIGH
+**Status**: PARTIAL (173 remaining, build passes)
+
+Major error categories:
+
+| Category | Count | Files Affected |
+|----------|-------|----------------|
+| Missing React namespace | ~20 | Multiple components |
+| Missing module imports | ~15 | admin/*, agent/* routes |
+| ImportMeta.env errors | ~10 | api/client.ts, sentry.ts |
+| RealityCheckResult mismatch | ~40 | RealityCheckForm.tsx |
+| jsPDF type compatibility | ~5 | pdfBranding.ts |
+
+**Key Files to Fix**:
+1. `src/components/realityCheck/RealityCheckForm.tsx` - ~40 errors
+2. `src/components/ErrorBoundary.tsx` - React class types
+3. `src/lib/utils/pdfBranding.ts` - jsPDF API changes
+4. `src/routes/admin/*.tsx` - Module path resolution
+5. `src/routes/agent/*.tsx` - Module path resolution
+
+---
+
+### HIGH: Frontend-Backend Schema Mismatch
+
+**Severity**: HIGH
+**Status**: RESOLVED (RealityCheckForm updated)
+
+**Frontend** (src/lib/hooks/useRealityCheck.ts):
+```typescript
+interface RealityCheckInput {
+  propertyPrice: number;
+  regionCode: string;
+  areaSquareMeters: number;
+  annualIncome: number;
+  cashAssets: number;
+  houseCount: number;
+  isFirstHome: boolean;
+  loanTermYears: number;
+  interestRate: number;
+}
+```
+
+**Backend** (backend/app/schemas/reality.py):
+```python
+class RealityCheckInput(BaseModel):
+    property_price: int
+    transaction_type: str
+    region: str
+    annual_income: int
+    available_cash: int
+    existing_debt: int
+    monthly_expenses: int
+    house_count: int
+```
+
+**Issues**:
+- Different field names (camelCase vs snake_case)
+- Missing fields on both sides
+- Frontend calculates locally instead of calling backend API
+- No API transformation layer
+
+---
+
+### MEDIUM: OAuth Configuration Incomplete
+
+| Provider | Status | Action Needed |
+|----------|--------|---------------|
+| Google | Configured | Register redirect URI in Google Console |
+| Kakao | Not Configured | Provide REST API Key |
+| Naver | Pending | App deployment required |
+
+**Google Redirect URI to Register**:
+```
+https://trendy.storydot.kr/real/api/v1/auth/social/google/callback
+```
+
+---
+
+### LOW: Bundle Size Warning
+
+One chunk exceeds 500KB:
+```
+dist/assets/index-DudLRkFE.js - 514.69 kB
+```
+
+Consider further splitting:
+- recharts visualization components
+- Form validation logic
+- Feature-specific code
+
+---
+
+## API Integration Status
+
+| Endpoint | Backend | Frontend | Notes |
+|----------|---------|----------|-------|
+| Auth Register | ✅ | ✅ | Working |
+| Auth Login | ✅ | ✅ | Working |
+| Auth Me | ✅ | ✅ | Working |
+| OAuth Google | ✅ | ✅ | Needs redirect URI registration |
+| OAuth Kakao | ✅ | ✅ | Needs API Key |
+| OAuth Naver | ✅ | ✅ | Pending app deployment |
+| Reality Calculate | ✅ | ⚠️ | Frontend uses local calc, not API |
+| Signals CRUD | ✅ | ✅ | Backend TODO: DB implementation |
+| Contracts CRUD | ✅ | ✅ | Backend TODO: DB implementation |
+| Agent B2B | ✅ | ✅ | Working |
+| Admin Dashboard | ✅ | ✅ | Working |
+
+---
+
+## Recommended Action Plan
+
+### Phase 1: Security (Immediate - Today)
+- [ ] Generate and configure production SECRET_KEY
+- [ ] Add missing secrets (GEMINI_API_KEY, etc.)
+- [ ] Register Google OAuth redirect URI
+
+### Phase 2: Type System Fix (1-2 days)
+- [ ] Add `"types": ["vite/client"]` to tsconfig.json
+- [ ] Fix RealityCheckResult interface to match actual data
+- [ ] Add missing React imports
+- [ ] Fix jsPDF type compatibility
+
+### Phase 3: API Integration (2-3 days)
+- [ ] Create API transformation layer for reality check
+- [ ] Connect frontend reality check to backend API
+- [ ] Implement proper error handling
+- [ ] Add loading states for all API calls
+
+### Phase 4: OAuth Completion (When ready)
+- [ ] Configure Kakao OAuth (when REST API Key provided)
+- [ ] Configure Naver OAuth (after app deployment)

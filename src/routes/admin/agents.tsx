@@ -68,7 +68,7 @@ function AdminAgentsPage() {
 
   const approveMutation = useMutation({
     mutationFn: async (agentId: string) => {
-      return await apiClient.post(`/admin/agents/${agentId}/approve`);
+      return await apiClient.post(`/admin/agents/${agentId}/verify`, { approved: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'agents'] });
@@ -79,7 +79,7 @@ function AdminAgentsPage() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ agentId, reason }: { agentId: string; reason: string }) => {
-      return await apiClient.post(`/admin/agents/${agentId}/reject`, { reason });
+      return await apiClient.post(`/admin/agents/${agentId}/verify`, { approved: false, rejection_reason: reason });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'agents'] });

@@ -53,7 +53,7 @@ class KakaoOAuth:
     def __init__(self):
         self.client_id = settings.KAKAO_CLIENT_ID
         self.client_secret = settings.KAKAO_CLIENT_SECRET
-        self.redirect_uri = f"{settings.FRONTEND_URL}/real/api/v1/auth/social/kakao/callback"
+        self.redirect_uri = f"{settings.FRONTEND_URL}/api/v1/auth/social/kakao/callback"
 
     def get_authorization_url(self, state: str) -> str:
         """Get Kakao authorization URL."""
@@ -120,7 +120,7 @@ class NaverOAuth:
     def __init__(self):
         self.client_id = settings.NAVER_CLIENT_ID
         self.client_secret = settings.NAVER_CLIENT_SECRET
-        self.redirect_uri = f"{settings.FRONTEND_URL}/real/api/v1/auth/social/naver/callback"
+        self.redirect_uri = f"{settings.FRONTEND_URL}/api/v1/auth/social/naver/callback"
 
     def get_authorization_url(self, state: str) -> str:
         """Get Naver authorization URL."""
@@ -185,7 +185,7 @@ class GoogleOAuth:
     def __init__(self):
         self.client_id = settings.GOOGLE_CLIENT_ID
         self.client_secret = settings.GOOGLE_CLIENT_SECRET
-        self.redirect_uri = f"{settings.FRONTEND_URL}/real/api/v1/auth/social/google/callback"
+        self.redirect_uri = f"{settings.FRONTEND_URL}/api/v1/auth/social/google/callback"
 
     def get_authorization_url(self, state: str) -> str:
         """Get Google authorization URL."""

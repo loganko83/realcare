@@ -67,15 +67,13 @@ function AgentListingsPage() {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.set('status', statusFilter);
       if (searchQuery) params.set('search', searchQuery);
-      return apiClient.fetch(`/agents/me/listings?${params.toString()}`);
+      return apiClient.get(`/agents/listings?${params.toString()}`);
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (listingId: string) => {
-      return apiClient.fetch(`/agents/listings/${listingId}`, {
-        method: 'DELETE',
-      });
+      return apiClient.delete(`/agents/listings/${listingId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent', 'listings'] });

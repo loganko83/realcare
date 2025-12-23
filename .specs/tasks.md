@@ -1,7 +1,7 @@
 # RealCare Implementation Tasks
 
 > Consolidated task list following Spec-Kit methodology
-> Updated: 2024-12-23
+> Updated: 2025-12-23
 
 ## Phase Overview
 
@@ -14,8 +14,9 @@
 | 10 | Real Integrations | 40 | Medium-High | DONE |
 | 11 | Operations & Management | 28 | Medium | DONE |
 | 12 | Security & Performance | 24 | Medium | DONE |
+| 13 | System Remediation | 12 | Critical | IN PROGRESS |
 
-**ALL PHASES COMPLETE!** Full-stack real estate care platform with admin dashboard, notifications, file uploads, and analytics.
+**Phase 1-12 COMPLETE!** Phase 13 addresses critical security and TypeScript issues found during system audit.
 
 ---
 
@@ -317,3 +318,38 @@ For each task:
 - Backend runs on port 8092
 - DID BaaS runs on port 8091
 - Frontend builds to `/real/` subdirectory
+
+---
+
+## Phase 13: System Remediation (IN PROGRESS)
+
+> Details: `.specs/phase-13-remediation.md`
+
+### Sprint 13.1: Security Fixes
+| ID | Task | Status |
+|----|------|--------|
+| P13-01-A | Generate and configure SECRET_KEY | DONE |
+| P13-01-B | Document Google OAuth redirect URI | DONE |
+
+### Sprint 13.2: TypeScript Fixes
+| ID | Task | Status |
+|----|------|--------|
+| P13-02-A | Add vite/client types to tsconfig.json | DONE |
+| P13-02-B | Fix RealityCheckResult interface | DONE |
+| P13-02-C | Fix ErrorBoundary React types | DONE |
+| P13-02-D | Fix path alias (@/ -> ./src/*) | DONE |
+| P13-02-E | Fix pdfBranding type issues | DONE |
+| P13-02-F | Fix taxCalculator missing limit property | DONE |
+| P13-02-G | Install @types/react and @types/react-dom | DONE |
+| P13-02-H | Remaining TypeScript strict mode errors | PENDING (non-blocking) |
+
+### Sprint 13.3: API Integration
+| ID | Task | Status |
+|----|------|--------|
+| P13-03-A | Update RealityCheckForm input format | DONE |
+| P13-03-B | Connect frontend to backend API | PENDING (optional) |
+
+### Server Deployment Required
+1. Deploy updated `ecosystem.config.cjs` with SECRET_KEY
+2. Restart PM2 service
+3. Register Google OAuth redirect URI in Google Console

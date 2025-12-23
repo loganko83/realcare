@@ -92,7 +92,7 @@ function AdminUsersPage() {
 
   const unbanMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiClient.post(`/admin/users/${userId}/unban`);
+      return await apiClient.put(`/admin/users/${userId}`, { is_active: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });

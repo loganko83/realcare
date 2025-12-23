@@ -212,10 +212,10 @@ export function calculateTransferTax(input: TaxCalculationInput): TransferTaxRes
 
   if (holdingPeriodYears < 1) {
     incomeTax = taxableIncome * 0.70;
-    bracket = { rate: 70, deduction: 0, name: '70% (Short-term)' };
+    bracket = { limit: Infinity, rate: 70, deduction: 0, name: '70% (Short-term)' };
   } else if (holdingPeriodYears < 2) {
     incomeTax = taxableIncome * 0.60;
-    bracket = { rate: 60, deduction: 0, name: '60% (Short-term)' };
+    bracket = { limit: Infinity, rate: 60, deduction: 0, name: '60% (Short-term)' };
   } else {
     // Progressive tax
     for (const b of INCOME_TAX_BRACKETS) {

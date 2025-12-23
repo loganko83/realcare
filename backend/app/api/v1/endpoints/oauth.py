@@ -18,7 +18,7 @@ from app.services.oauth import oauth_service, OAuthError, OAuthUserInfo
 import structlog
 
 logger = structlog.get_logger()
-router = APIRouter(prefix="/auth/social", tags=["OAuth"])
+router = APIRouter()
 
 # State storage (in production, use Redis)
 oauth_states: dict = {}
@@ -160,7 +160,10 @@ async def oauth_callback(
 
             # Redirect to frontend with tokens
             # In production, use secure cookies instead of URL parameters
-            frontend_url = f"/real{redirect_url}"
+            from app.core.config import get_settings
+            settings = get_settings()
+            base_path = settings.FRONTEND_URL.replace("https://trendy.storydot.kr", "")
+            frontend_url = f"{base_path}{redirect_url}"
 
             if "?" in frontend_url:
                 frontend_url += f"&access_token={access_token}&refresh_token={refresh_token}"
@@ -171,4 +174,7 @@ async def oauth_callback(
 
     except OAuthError as e:
         logger.error("OAuth callback failed", provider=provider, error=str(e))
-        return RedirectResponse(url=f"/real/login?error={e.code}")
+        from app.core.config import get_settings
+        settings = get_settings()
+        base_path = settings.FRONTEND_URL.replace("https://trendy.storydot.kr", "")
+        return RedirectResponse(url=f"{base_path}/login?error={e.code}")

@@ -41,20 +41,17 @@ function CheckoutPage() {
   const { data: plan, isLoading: planLoading } = useQuery<Plan>({
     queryKey: ['subscription', 'plan', planId],
     queryFn: async () => {
-      return apiClient.fetch(`/subscriptions/plans/${planId}`);
+      return apiClient.get(`/payments/plans/${planId}`);
     },
     enabled: !!planId,
   });
 
   const createPaymentMutation = useMutation({
     mutationFn: async () => {
-      return apiClient.fetch('/payments/create', {
-        method: 'POST',
-        body: JSON.stringify({
-          plan_id: planId,
-          billing_cycle: billingCycle,
-          payment_method: paymentMethod,
-        }),
+      return apiClient.post('/payments/create', {
+        plan_id: planId,
+        billing_cycle: billingCycle,
+        payment_method: paymentMethod,
       });
     },
     onSuccess: (data: { payment_url?: string; order_id?: string }) => {

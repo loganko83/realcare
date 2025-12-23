@@ -75,9 +75,9 @@ function WalletPage() {
     queryKey: ['wallet'],
     queryFn: async () => {
       const [wallet, credentials, verifications] = await Promise.all([
-        apiClient.fetch('/did/wallet').catch(() => null),
-        apiClient.fetch('/did/credentials').catch(() => ({ items: [] })),
-        apiClient.fetch('/blockchain/verifications').catch(() => ({ items: [] })),
+        apiClient.get('/blockchain/wallet').catch(() => null),
+        apiClient.get('/blockchain/credentials').catch(() => ({ items: [] })),
+        apiClient.get('/blockchain/verifications').catch(() => ({ items: [] })),
       ]);
       return {
         wallet,
@@ -89,7 +89,7 @@ function WalletPage() {
 
   const createWalletMutation = useMutation({
     mutationFn: async () => {
-      return apiClient.fetch('/did/create', { method: 'POST' });
+      return apiClient.post('/blockchain/did/create', {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });

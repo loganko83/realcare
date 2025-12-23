@@ -87,7 +87,6 @@ export function addPdfHeader(
   pdf.setFontSize(8);
   pdf.setTextColor(255, 255, 255);
   pdf.setFillColor(79, 70, 229);
-  const labelWidth = pdf.text(reportLabel, 0, 0).length || 40;
   pdf.rect(width - margin.right - 35, margin.top - 5, 35, 6, 'F');
   pdf.text(reportLabel, width - margin.right - 33, margin.top - 1);
 
@@ -247,7 +246,9 @@ export function addTextContent(
   pdf.setFont('helvetica', fontStyle);
 
   const lines = pdf.splitTextToSize(text, contentWidth - indent);
-  pdf.text(lines, margin.left + indent, y);
+  lines.forEach((line: string, index: number) => {
+    pdf.text(line, margin.left + indent, y + index * (fontSize * 0.4 + 1));
+  });
 
   // Return new Y position (approximate line height)
   return y + lines.length * (fontSize * 0.4 + 1);
@@ -319,7 +320,9 @@ export function addRiskItem(
   pdf.setFont('helvetica', 'normal');
   const explanationLines = pdf.splitTextToSize(risk.explanation, contentWidth - 12);
   const limitedLines = explanationLines.slice(0, 2);
-  pdf.text(limitedLines, margin.left + 6, y + 17);
+  limitedLines.forEach((line: string, index: number) => {
+    pdf.text(line, margin.left + 6, y + 17 + index * 4);
+  });
 
   return y + boxHeight + 5;
 }

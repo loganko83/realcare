@@ -80,13 +80,16 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
   const handleCalculate = () => {
     calculateScore(
       {
-        region,
-        targetPrice: targetPrice * 1000000, // convert to won
+        propertyPrice: targetPrice * 1000000, // convert to won
+        regionCode: region,
+        areaSquareMeters: 85, // default apartment size
         annualIncome: annualIncome * 1000000,
-        cashAvailable: cashAvailable * 1000000,
-        existingDebt: existingDebt * 1000000,
+        cashAssets: cashAvailable * 1000000,
+        monthlyDebtPayment: existingDebt * 1000000,
         isFirstHome,
         houseCount,
+        loanTermYears: 30, // default 30 year loan
+        interestRate: 4.5, // default interest rate
       },
       {
         onSuccess: (data) => {
@@ -96,6 +99,9 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
       }
     );
   };
+
+  // Extract score result for easier access
+  const scoreResult = result?.score;
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -118,7 +124,7 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
   };
 
   const handleDownloadPdf = async () => {
-    if (!result) return;
+    if (!scoreResult) return;
 
     setDownloadingPdf(true);
     try {
@@ -145,17 +151,17 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
       });
 
       // Score display
-      y = addScoreDisplay(pdf, result.score, `Grade ${result.grade}`, y);
+      y = addScoreDisplay(pdf, scoreResult.score, `Grade ${scoreResult.grade}`, y);
 
       // Score breakdown
       y = addSectionHeader(pdf, 'Score Breakdown', y, 'primary');
       y += 2;
 
       const breakdowns = [
-        { label: 'LTV Score', value: `${result.breakdown.ltvScore}/25` },
-        { label: 'DSR Score', value: `${result.breakdown.dsrScore}/25` },
-        { label: 'Cash Gap Score', value: `${result.breakdown.cashGapScore}/25` },
-        { label: 'Stability Score', value: `${result.breakdown.stabilityScore}/25` },
+        { label: 'LTV Score', value: `${scoreResult.breakdown.ltvScore}/25` },
+        { label: 'DSR Score', value: `${scoreResult.breakdown.dsrScore}/25` },
+        { label: 'Cash Gap Score', value: `${scoreResult.breakdown.cashGapScore}/25` },
+        { label: 'Stability Score', value: `${scoreResult.breakdown.stabilityScore}/25` },
       ];
 
       breakdowns.forEach((item, idx) => {
@@ -175,13 +181,13 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
       y += 2;
 
       const financialData = [
-        { label: 'Target Property', value: new Intl.NumberFormat('ko-KR').format(result.analysis.targetPrice) + ' KRW' },
-        { label: 'Max Loan (LTV)', value: new Intl.NumberFormat('ko-KR').format(result.analysis.maxLoanByLTV) + ' KRW' },
-        { label: 'Max Loan (DSR Limited)', value: new Intl.NumberFormat('ko-KR').format(result.analysis.maxLoanByDSR) + ' KRW' },
-        { label: 'Actual Max Loan', value: new Intl.NumberFormat('ko-KR').format(result.analysis.maxLoanAmount) + ' KRW' },
-        { label: 'Required Cash', value: new Intl.NumberFormat('ko-KR').format(result.analysis.requiredCash) + ' KRW' },
-        { label: 'Monthly Payment', value: new Intl.NumberFormat('ko-KR').format(result.analysis.monthlyRepayment) + ' KRW' },
-        { label: 'DSR Ratio', value: result.analysis.dsrPercentage.toFixed(1) + '%' },
+        { label: 'Target Property', value: new Intl.NumberFormat('ko-KR').format(targetPrice * 1000000) + ' KRW' },
+        { label: 'Max Loan (LTV)', value: new Intl.NumberFormat('ko-KR').format(scoreResult.analysis.maxLoanByLTV) + ' KRW' },
+        { label: 'Max Loan (DSR Limited)', value: new Intl.NumberFormat('ko-KR').format(scoreResult.analysis.maxLoanByDSR) + ' KRW' },
+        { label: 'Actual Max Loan', value: new Intl.NumberFormat('ko-KR').format(scoreResult.analysis.maxLoanAmount) + ' KRW' },
+        { label: 'Required Cash', value: new Intl.NumberFormat('ko-KR').format(scoreResult.analysis.requiredCash) + ' KRW' },
+        { label: 'Monthly Payment', value: new Intl.NumberFormat('ko-KR').format(scoreResult.analysis.monthlyRepayment) + ' KRW' },
+        { label: 'DSR Ratio', value: scoreResult.analysis.dsrPercentage.toFixed(1) + '%' },
       ];
 
       financialData.forEach(item => {
@@ -197,11 +203,11 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
       y += 8;
 
       // Risks
-      if (result.risks.length > 0) {
-        y = addSectionHeader(pdf, `Risk Factors (${result.risks.length})`, y, 'warning');
+      if (scoreResult.risks.length > 0) {
+        y = addSectionHeader(pdf, `Risk Factors (${scoreResult.risks.length})`, y, 'warning');
         y += 3;
 
-        result.risks.slice(0, 4).forEach((risk, idx) => {
+        scoreResult.risks.slice(0, 4).forEach((risk, idx) => {
           const riskColor: [number, number, number] =
             risk.type === 'critical' ? [239, 68, 68] :
             risk.type === 'warning' ? [245, 158, 11] :
@@ -231,7 +237,7 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
     }
   };
 
-  if (showResult && result) {
+  if (showResult && scoreResult) {
     // Show scenario comparison view
     if (showComparison) {
       return (
@@ -260,8 +266,8 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
 
     const chartData = [{
       name: 'Score',
-      value: result.score,
-      fill: getGradeColor(result.grade),
+      value: scoreResult.score,
+      fill: getGradeColor(scoreResult.grade),
     }];
 
     return (
@@ -271,12 +277,12 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg text-slate-800">Reality Check Result</h2>
             <div className="flex items-center gap-2">
-              <ShareButton state={shareableState} score={result.score} />
+              <ShareButton state={shareableState} score={scoreResult.score} />
               <span
                 className="text-2xl font-bold px-3 py-1 rounded-lg"
-                style={{ color: getGradeColor(result.grade), backgroundColor: `${getGradeColor(result.grade)}15` }}
+                style={{ color: getGradeColor(scoreResult.grade), backgroundColor: `${getGradeColor(scoreResult.grade)}15` }}
               >
-                Grade {result.grade}
+                Grade {scoreResult.grade}
               </span>
             </div>
           </div>
@@ -296,7 +302,7 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
               </RadialBarChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-8 pointer-events-none">
-              <span className="text-4xl font-bold text-slate-800">{result.score}</span>
+              <span className="text-4xl font-bold text-slate-800">{scoreResult.score}</span>
               <span className="text-xs text-slate-400">/ 100</span>
             </div>
           </div>
@@ -305,19 +311,19 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-xs text-slate-500">LTV Score</p>
-              <p className="text-lg font-bold text-slate-800">{result.breakdown.ltvScore}/25</p>
+              <p className="text-lg font-bold text-slate-800">{scoreResult.breakdown.ltvScore}/25</p>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-xs text-slate-500">DSR Score</p>
-              <p className="text-lg font-bold text-slate-800">{result.breakdown.dsrScore}/25</p>
+              <p className="text-lg font-bold text-slate-800">{scoreResult.breakdown.dsrScore}/25</p>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-xs text-slate-500">Cash Gap</p>
-              <p className="text-lg font-bold text-slate-800">{result.breakdown.cashGapScore}/25</p>
+              <p className="text-lg font-bold text-slate-800">{scoreResult.breakdown.cashGapScore}/25</p>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-xs text-slate-500">Stability</p>
-              <p className="text-lg font-bold text-slate-800">{result.breakdown.stabilityScore}/25</p>
+              <p className="text-lg font-bold text-slate-800">{scoreResult.breakdown.stabilityScore}/25</p>
             </div>
           </div>
         </div>
@@ -328,48 +334,48 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-300">Target Property</span>
-              <span className="font-bold">{formatKRW(result.analysis.targetPrice)}</span>
+              <span className="font-bold">{formatKRW(targetPrice * 1000000)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-300">Max Loan (LTV {result.analysis.applicableLTV}%)</span>
-              <span className="font-bold">{formatKRW(result.analysis.maxLoanByLTV)}</span>
+              <span className="text-slate-300">Max Loan (LTV {scoreResult.analysis.applicableLTV}%)</span>
+              <span className="font-bold">{formatKRW(scoreResult.analysis.maxLoanByLTV)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-300">Max Loan (DSR Limited)</span>
-              <span className="font-bold">{formatKRW(result.analysis.maxLoanByDSR)}</span>
+              <span className="font-bold">{formatKRW(scoreResult.analysis.maxLoanByDSR)}</span>
             </div>
             <div className="flex justify-between border-t border-slate-600 pt-3">
               <span className="text-slate-300">Actual Max Loan</span>
-              <span className="font-bold text-brand-400">{formatKRW(result.analysis.maxLoanAmount)}</span>
+              <span className="font-bold text-brand-400">{formatKRW(scoreResult.analysis.maxLoanAmount)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-300">Required Cash</span>
-              <span className="font-bold">{formatKRW(result.analysis.requiredCash)}</span>
+              <span className="font-bold">{formatKRW(scoreResult.analysis.requiredCash)}</span>
             </div>
-            {result.analysis.gapAmount > 0 && (
+            {scoreResult.analysis.gapAmount > 0 && (
               <div className="flex justify-between text-red-400">
                 <span>Cash Shortage</span>
-                <span className="font-bold">{formatKRW(result.analysis.gapAmount)}</span>
+                <span className="font-bold">{formatKRW(scoreResult.analysis.gapAmount)}</span>
               </div>
             )}
             <div className="flex justify-between border-t border-slate-600 pt-3">
               <span className="text-slate-300">Monthly Payment</span>
-              <span className="font-bold">{formatKRW(result.analysis.monthlyRepayment)}</span>
+              <span className="font-bold">{formatKRW(scoreResult.analysis.monthlyRepayment)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-300">DSR Ratio</span>
-              <span className={`font-bold ${result.analysis.dsrPercentage > 40 ? 'text-red-400' : 'text-green-400'}`}>
-                {result.analysis.dsrPercentage.toFixed(1)}%
+              <span className={`font-bold ${scoreResult.analysis.dsrPercentage > 40 ? 'text-red-400' : 'text-green-400'}`}>
+                {scoreResult.analysis.dsrPercentage.toFixed(1)}%
               </span>
             </div>
           </div>
         </div>
 
         {/* Risks */}
-        {result.risks.length > 0 && (
+        {scoreResult.risks.length > 0 && (
           <div className="space-y-3">
             <h3 className="font-bold text-slate-800">Risk Factors</h3>
-            {result.risks.map((risk, idx) => (
+            {scoreResult.risks.map((risk, idx) => (
               <div
                 key={idx}
                 className={`p-4 rounded-xl border-l-4 ${
@@ -399,14 +405,14 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
             <MapPin size={18} /> Region: {selectedRegion?.name}
           </h3>
           <div className="text-sm text-brand-700 space-y-1">
-            {result.region.isSpeculativeZone && (
-              <p>Speculative Overheated Zone - LTV limit: {result.region.maxLTV}%</p>
+            {scoreResult.region.isSpeculativeZone && (
+              <p>Speculative Overheated Zone - LTV limit: {scoreResult.analysis.applicableLTV}%</p>
             )}
-            {result.region.isAdjustedZone && !result.region.isSpeculativeZone && (
-              <p>Adjusted Zone - LTV limit: {result.region.maxLTV}%</p>
+            {scoreResult.region.isAdjustedZone && !scoreResult.region.isSpeculativeZone && (
+              <p>Adjusted Zone - LTV limit: {scoreResult.analysis.applicableLTV}%</p>
             )}
-            {!result.region.isSpeculativeZone && !result.region.isAdjustedZone && (
-              <p>Non-Regulated Zone - LTV limit: {result.region.maxLTV}%</p>
+            {!scoreResult.region.isSpeculativeZone && !scoreResult.region.isAdjustedZone && (
+              <p>Non-Regulated Zone - LTV limit: {scoreResult.analysis.applicableLTV}%</p>
             )}
           </div>
         </div>

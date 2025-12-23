@@ -46,8 +46,7 @@ function AgentDashboardPage() {
   const { data: stats, isLoading } = useQuery<AgentDashboardStats>({
     queryKey: ['agent', 'dashboard'],
     queryFn: async () => {
-      const response = await apiClient.fetch('/agents/dashboard');
-      return response;
+      return await apiClient.get('/agents/dashboard');
     },
   });
 

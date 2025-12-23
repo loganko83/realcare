@@ -38,7 +38,7 @@ function PlansPage() {
   const { data, isLoading } = useQuery<PlansResponse>({
     queryKey: ['subscription', 'plans'],
     queryFn: async () => {
-      return apiClient.fetch('/subscriptions/plans');
+      return apiClient.get('/payments/plans');
     },
   });
 

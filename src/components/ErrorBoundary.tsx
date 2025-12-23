@@ -19,13 +19,14 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
+  override state: State = {
+    hasError: false,
+    error: null,
+    eventId: null,
+  };
+
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-      eventId: null,
-    };
   }
 
   static getDerivedStateFromError(error: Error): State {

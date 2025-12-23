@@ -73,10 +73,7 @@ function AgentRegisterPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: AgentRegisterForm) => {
-      return apiClient.fetch('/agents/register', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiClient.post('/agents/register', data);
     },
     onSuccess: () => {
       navigate({ to: '/agent' });
