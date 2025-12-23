@@ -6,14 +6,14 @@ interface ContractInput {
   mimeType?: string;
 }
 
-interface Risk {
+export interface Risk {
   clause: string;
   explanation: string;
   severity: 'High' | 'Medium' | 'Low';
   suggestion: string[];
 }
 
-interface AnalysisResult {
+export interface AnalysisResult {
   summary: string;
   risks: Risk[];
 }

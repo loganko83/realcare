@@ -34,7 +34,6 @@ function ResetPasswordPage() {
       password: '',
       passwordConfirm: '',
     },
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       setError(null);
       setIsSubmitting(true);
@@ -69,7 +68,7 @@ function ResetPasswordPage() {
       <div className="min-h-screen bg-white px-6 py-8">
         <div className="flex items-center mb-8">
           <button
-            onClick={() => navigate({ to: '/login' })}
+            onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
             className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -87,7 +86,7 @@ function ResetPasswordPage() {
             This password reset link is invalid or has expired.
           </p>
           <button
-            onClick={() => navigate({ to: '/forgot-password' })}
+            onClick={() => navigate({ to: '/forgot-password', search: {} })}
             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
             Request New Link
@@ -103,7 +102,7 @@ function ResetPasswordPage() {
       <div className="min-h-screen bg-white px-6 py-8">
         <div className="flex items-center mb-8">
           <button
-            onClick={() => navigate({ to: '/login' })}
+            onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
             className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -121,7 +120,7 @@ function ResetPasswordPage() {
             You can now login with your new password.
           </p>
           <button
-            onClick={() => navigate({ to: '/login' })}
+            onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
             {t('auth_login_button')}
@@ -136,7 +135,7 @@ function ResetPasswordPage() {
       {/* Header */}
       <div className="flex items-center mb-8">
         <button
-          onClick={() => navigate({ to: '/login' })}
+          onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
           className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -203,7 +202,7 @@ function ResetPasswordPage() {
                 </button>
               </div>
               {field.state.meta.errors.length > 0 && (
-                <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
               )}
             </div>
           )}
@@ -249,7 +248,7 @@ function ResetPasswordPage() {
                 </button>
               </div>
               {field.state.meta.errors.length > 0 && (
-                <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
               )}
             </div>
           )}
@@ -269,7 +268,7 @@ function ResetPasswordPage() {
       <p className="mt-8 text-center text-gray-600">
         <button
           type="button"
-          onClick={() => navigate({ to: '/login' })}
+          onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
           className="text-blue-600 font-medium hover:text-blue-700"
         >
           {t('auth_back_to_login')}

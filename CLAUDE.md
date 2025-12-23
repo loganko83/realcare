@@ -22,10 +22,11 @@ RealCare is a Korean real estate care service with a React frontend and FastAPI 
 
 ### Frontend
 ```bash
-npm install      # Install dependencies
-npm run dev      # Start dev server (port 3000)
-npm run build    # Production build
-npm run preview  # Preview production build
+npm install          # Install dependencies
+npm run dev          # Start dev server (port 3000)
+npm run build        # Production build (outputs to dist/)
+npm run preview      # Preview production build
+npx tsc --noEmit     # Type check without emitting
 ```
 
 ### Backend
@@ -41,6 +42,20 @@ alembic revision -m "description"       # Create new migration
 
 # Run server
 uvicorn app.main:app --reload --port 8092
+```
+
+### Testing
+```bash
+# Backend tests (requires PostgreSQL with realcare_test database)
+cd backend
+pytest                              # Run all tests
+pytest tests/test_auth.py           # Run single test file
+pytest tests/test_auth.py -k "test_register"  # Run specific test
+
+# E2E tests (Playwright, runs against production URL)
+npx playwright test                 # Run all E2E tests
+npx playwright test --ui            # Interactive mode
+npx playwright test e2e/realcare.spec.ts  # Single spec file
 ```
 
 ## Environment Setup

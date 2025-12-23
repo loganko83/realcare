@@ -1,0 +1,7 @@
+# Test Dependencies for RealCare Backend
+pytest==7.4.4
+pytest-asyncio==0.23.2
+pytest-cov==4.1.0
+httpx==0.28.1
+factory-boy==3.3.0
+faker==22.0.0

@@ -73,16 +73,16 @@ function WalletPage() {
 
   const { data, isLoading } = useQuery<WalletData>({
     queryKey: ['wallet'],
-    queryFn: async () => {
+    queryFn: async (): Promise<WalletData> => {
       const [wallet, credentials, verifications] = await Promise.all([
         apiClient.get('/blockchain/wallet').catch(() => null),
         apiClient.get('/blockchain/credentials').catch(() => ({ items: [] })),
         apiClient.get('/blockchain/verifications').catch(() => ({ items: [] })),
       ]);
       return {
-        wallet,
-        credentials: credentials?.items || [],
-        verifications: verifications?.items || [],
+        wallet: wallet as DIDWallet | undefined,
+        credentials: (credentials as any)?.items || [],
+        verifications: (verifications as any)?.items || [],
       };
     },
   });

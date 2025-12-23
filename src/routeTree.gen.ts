@@ -25,10 +25,14 @@ import { Route as CalculatorsRouteImport } from './routes/calculators'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentIndexRouteImport } from './routes/agent/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AgentSignalsRouteImport } from './routes/agent/signals'
+import { Route as AgentSettingsRouteImport } from './routes/agent/settings'
 import { Route as AgentRegisterRouteImport } from './routes/agent/register'
 import { Route as AgentListingsRouteImport } from './routes/agent/listings'
+import { Route as AgentAnalyticsRouteImport } from './routes/agent/analytics'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
+import { Route as AgentListingsNewRouteImport } from './routes/agent/listings_.new'
 
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
@@ -110,6 +114,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentSignalsRoute = AgentSignalsRouteImport.update({
+  id: '/agent/signals',
+  path: '/agent/signals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentSettingsRoute = AgentSettingsRouteImport.update({
+  id: '/agent/settings',
+  path: '/agent/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgentRegisterRoute = AgentRegisterRouteImport.update({
   id: '/agent/register',
   path: '/agent/register',
@@ -120,6 +134,11 @@ const AgentListingsRoute = AgentListingsRouteImport.update({
   path: '/agent/listings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentAnalyticsRoute = AgentAnalyticsRouteImport.update({
+  id: '/agent/analytics',
+  path: '/agent/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -128,6 +147,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
 const AdminAgentsRoute = AdminAgentsRouteImport.update({
   id: '/admin/agents',
   path: '/admin/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentListingsNewRoute = AgentListingsNewRouteImport.update({
+  id: '/agent/listings_/new',
+  path: '/agent/listings/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -148,10 +172,14 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof WalletRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/agent/analytics': typeof AgentAnalyticsRoute
   '/agent/listings': typeof AgentListingsRoute
   '/agent/register': typeof AgentRegisterRoute
+  '/agent/settings': typeof AgentSettingsRoute
+  '/agent/signals': typeof AgentSignalsRoute
   '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
+  '/agent/listings/new': typeof AgentListingsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -170,10 +198,14 @@ export interface FileRoutesByTo {
   '/wallet': typeof WalletRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/agent/analytics': typeof AgentAnalyticsRoute
   '/agent/listings': typeof AgentListingsRoute
   '/agent/register': typeof AgentRegisterRoute
+  '/agent/settings': typeof AgentSettingsRoute
+  '/agent/signals': typeof AgentSignalsRoute
   '/admin': typeof AdminIndexRoute
   '/agent': typeof AgentIndexRoute
+  '/agent/listings/new': typeof AgentListingsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -193,10 +225,14 @@ export interface FileRoutesById {
   '/wallet': typeof WalletRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/agent/analytics': typeof AgentAnalyticsRoute
   '/agent/listings': typeof AgentListingsRoute
   '/agent/register': typeof AgentRegisterRoute
+  '/agent/settings': typeof AgentSettingsRoute
+  '/agent/signals': typeof AgentSignalsRoute
   '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
+  '/agent/listings_/new': typeof AgentListingsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -217,10 +253,14 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/admin/agents'
     | '/admin/users'
+    | '/agent/analytics'
     | '/agent/listings'
     | '/agent/register'
+    | '/agent/settings'
+    | '/agent/signals'
     | '/admin'
     | '/agent'
+    | '/agent/listings/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -239,10 +279,14 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/admin/agents'
     | '/admin/users'
+    | '/agent/analytics'
     | '/agent/listings'
     | '/agent/register'
+    | '/agent/settings'
+    | '/agent/signals'
     | '/admin'
     | '/agent'
+    | '/agent/listings/new'
   id:
     | '__root__'
     | '/'
@@ -261,10 +305,14 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/admin/agents'
     | '/admin/users'
+    | '/agent/analytics'
     | '/agent/listings'
     | '/agent/register'
+    | '/agent/settings'
+    | '/agent/signals'
     | '/admin/'
     | '/agent/'
+    | '/agent/listings_/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -284,10 +332,14 @@ export interface RootRouteChildren {
   WalletRoute: typeof WalletRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AgentAnalyticsRoute: typeof AgentAnalyticsRoute
   AgentListingsRoute: typeof AgentListingsRoute
   AgentRegisterRoute: typeof AgentRegisterRoute
+  AgentSettingsRoute: typeof AgentSettingsRoute
+  AgentSignalsRoute: typeof AgentSignalsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AgentIndexRoute: typeof AgentIndexRoute
+  AgentListingsNewRoute: typeof AgentListingsNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -404,6 +456,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent/signals': {
+      id: '/agent/signals'
+      path: '/agent/signals'
+      fullPath: '/agent/signals'
+      preLoaderRoute: typeof AgentSignalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/settings': {
+      id: '/agent/settings'
+      path: '/agent/settings'
+      fullPath: '/agent/settings'
+      preLoaderRoute: typeof AgentSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agent/register': {
       id: '/agent/register'
       path: '/agent/register'
@@ -418,6 +484,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentListingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent/analytics': {
+      id: '/agent/analytics'
+      path: '/agent/analytics'
+      fullPath: '/agent/analytics'
+      preLoaderRoute: typeof AgentAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/admin/users'
@@ -430,6 +503,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/agents'
       fullPath: '/admin/agents'
       preLoaderRoute: typeof AdminAgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/listings_/new': {
+      id: '/agent/listings_/new'
+      path: '/agent/listings/new'
+      fullPath: '/agent/listings/new'
+      preLoaderRoute: typeof AgentListingsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -452,10 +532,14 @@ const rootRouteChildren: RootRouteChildren = {
   WalletRoute: WalletRoute,
   AdminAgentsRoute: AdminAgentsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AgentAnalyticsRoute: AgentAnalyticsRoute,
   AgentListingsRoute: AgentListingsRoute,
   AgentRegisterRoute: AgentRegisterRoute,
+  AgentSettingsRoute: AgentSettingsRoute,
+  AgentSignalsRoute: AgentSignalsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AgentIndexRoute: AgentIndexRoute,
+  AgentListingsNewRoute: AgentListingsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

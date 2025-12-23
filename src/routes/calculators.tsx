@@ -338,8 +338,8 @@ function CalculatorsPage() {
       </div>
 
       {activeTab === 'reality' && <RealityCheckForm />}
-      {activeTab === 'tax' && <TaxCalculator t={t} />}
-      {activeTab === 'loan' && <LoanCalculator t={t} />}
+      {activeTab === 'tax' && <TaxCalculator t={t as (key: string) => string} />}
+      {activeTab === 'loan' && <LoanCalculator t={t as (key: string) => string} />}
     </div>
   );
 }

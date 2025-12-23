@@ -4,6 +4,9 @@ import { FileText, Check, AlertTriangle, Loader2, X, Camera, Image as ImageIcon,
 import { useContractAnalysis, useSaveAnalysis } from '../lib/hooks/useContractAnalysis';
 import { useTranslation } from '../lib/i18n/useTranslation';
 
+// Import AnalysisResult type from hook to avoid duplication
+import type { AnalysisResult } from '../lib/hooks/useContractAnalysis';
+
 // Lazy load PDF libraries (saves ~550KB from initial bundle)
 const loadPdfLibraries = async () => {
   const [jspdfModule, html2canvasModule] = await Promise.all([
@@ -19,18 +22,6 @@ const loadPdfLibraries = async () => {
 export const Route = createFileRoute('/contract')({
   component: ContractPage,
 });
-
-interface Risk {
-  clause: string;
-  explanation: string;
-  severity: string;
-  suggestion: string[];
-}
-
-interface AnalysisResult {
-  summary: string;
-  risks: Risk[];
-}
 
 function ContractPage() {
   const { t } = useTranslation();

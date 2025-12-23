@@ -4,29 +4,30 @@
  */
 
 import { lazy, Suspense } from 'react';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
 
-// Lazy load recharts components
+// Lazy load recharts components with type assertions to satisfy React.lazy requirements
+// Recharts components are valid React components but need explicit type casting via unknown
 const LazyRadialBarChart = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.RadialBarChart }))
+  import('recharts').then((mod) => ({ default: mod.RadialBarChart as unknown as ComponentType<any> }))
 );
 const LazyRadialBar = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.RadialBar }))
+  import('recharts').then((mod) => ({ default: mod.RadialBar as unknown as ComponentType<any> }))
 );
 const LazyPolarAngleAxis = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.PolarAngleAxis }))
+  import('recharts').then((mod) => ({ default: mod.PolarAngleAxis as unknown as ComponentType<any> }))
 );
 const LazyResponsiveContainer = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.ResponsiveContainer }))
+  import('recharts').then((mod) => ({ default: mod.ResponsiveContainer as unknown as ComponentType<any> }))
 );
 const LazyPieChart = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.PieChart }))
+  import('recharts').then((mod) => ({ default: mod.PieChart as unknown as ComponentType<any> }))
 );
 const LazyPie = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.Pie }))
+  import('recharts').then((mod) => ({ default: mod.Pie as unknown as ComponentType<any> }))
 );
 const LazyCell = lazy(() =>
-  import('recharts').then((mod) => ({ default: mod.Cell }))
+  import('recharts').then((mod) => ({ default: mod.Cell as unknown as ComponentType<any> }))
 );
 
 // Loading fallback component

@@ -95,7 +95,6 @@ function AgentRegisterPage() {
       service_areas: [] as string[],
       introduction: '',
     } as AgentRegisterForm,
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       setError(null);
       registerMutation.mutate(value);
@@ -112,7 +111,7 @@ function AgentRegisterPage() {
             Please login to register as an agent.
           </p>
           <button
-            onClick={() => navigate({ to: '/login', search: { redirect: '/agent/register' } })}
+            onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
             Login

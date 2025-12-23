@@ -43,7 +43,6 @@ function LoginPage() {
       password: '',
       rememberMe: false,
     } as LoginForm,
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       setError(null);
       setIsSubmitting(true);
@@ -129,7 +128,7 @@ function LoginPage() {
                 />
               </div>
               {field.state.meta.errors.length > 0 && (
-                <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
               )}
             </div>
           )}
@@ -178,7 +177,7 @@ function LoginPage() {
                 </button>
               </div>
               {field.state.meta.errors.length > 0 && (
-                <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
               )}
             </div>
           )}

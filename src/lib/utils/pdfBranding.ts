@@ -3,6 +3,8 @@
  * Adds RealCare branding (logo, headers, footers) to PDF exports
  */
 
+import type { jsPDF } from 'jspdf';
+
 // RealCare brand colors
 export const BRAND_COLORS = {
   primary: '#4F46E5',      // brand-600 indigo
@@ -47,15 +49,7 @@ interface BrandingOptions {
  * Add header with RealCare branding to PDF
  */
 export function addPdfHeader(
-  pdf: {
-    setFontSize: (size: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    rect: (x: number, y: number, w: number, h: number, style: string) => void;
-    text: (text: string, x: number, y: number, options?: { align?: string }) => void;
-    setFont: (font: string, style?: string) => void;
-    addImage: (data: string, format: string, x: number, y: number, w: number, h: number) => void;
-  },
+  pdf: jsPDF,
   options: BrandingOptions
 ): number {
   const { margin, width, contentWidth } = PDF_DIMENSIONS;
@@ -126,20 +120,11 @@ export function addPdfHeader(
  * Add footer with branding to PDF
  */
 export function addPdfFooter(
-  pdf: {
-    setFontSize: (size: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    rect: (x: number, y: number, w: number, h: number, style: string) => void;
-    text: (text: string, x: number, y: number, options?: { align?: string }) => void;
-    setFont: (font: string, style?: string) => void;
-    internal: { getNumberOfPages: () => number };
-    setPage: (page: number) => void;
-  },
+  pdf: jsPDF,
   totalPages?: number
 ): void {
   const { margin, width, height } = PDF_DIMENSIONS;
-  const pages = totalPages || pdf.internal.getNumberOfPages();
+  const pages = totalPages || (pdf.internal as any).getNumberOfPages();
 
   for (let i = 1; i <= pages; i++) {
     pdf.setPage(i);
@@ -177,14 +162,7 @@ export function addPdfFooter(
  * Add a section header
  */
 export function addSectionHeader(
-  pdf: {
-    setFontSize: (size: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    rect: (x: number, y: number, w: number, h: number, style: string) => void;
-    text: (text: string, x: number, y: number) => void;
-    setFont: (font: string, style?: string) => void;
-  },
+  pdf: jsPDF,
   title: string,
   y: number,
   color: 'primary' | 'success' | 'warning' | 'danger' = 'primary'
@@ -217,13 +195,7 @@ export function addSectionHeader(
  * Add text content with automatic wrapping
  */
 export function addTextContent(
-  pdf: {
-    setFontSize: (size: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    text: (text: string, x: number, y: number, options?: { maxWidth?: number }) => void;
-    setFont: (font: string, style?: string) => void;
-    splitTextToSize: (text: string, maxWidth: number) => string[];
-  },
+  pdf: jsPDF,
   text: string,
   y: number,
   options: {
@@ -258,15 +230,7 @@ export function addTextContent(
  * Add a risk item with severity indicator
  */
 export function addRiskItem(
-  pdf: {
-    setFontSize: (size: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    rect: (x: number, y: number, w: number, h: number, style: string) => void;
-    text: (text: string, x: number, y: number, options?: { maxWidth?: number }) => void;
-    setFont: (font: string, style?: string) => void;
-    splitTextToSize: (text: string, maxWidth: number) => string[];
-  },
+  pdf: jsPDF,
   risk: {
     clause: string;
     explanation: string;
@@ -331,16 +295,7 @@ export function addRiskItem(
  * Add a score display with visual indicator
  */
 export function addScoreDisplay(
-  pdf: {
-    setFontSize: (size: number) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    setDrawColor: (r: number, g: number, b: number) => void;
-    rect: (x: number, y: number, w: number, h: number, style: string) => void;
-    circle: (x: number, y: number, r: number, style: string) => void;
-    text: (text: string, x: number, y: number, options?: { align?: string }) => void;
-    setFont: (font: string, style?: string) => void;
-  },
+  pdf: jsPDF,
   score: number,
   label: string,
   y: number

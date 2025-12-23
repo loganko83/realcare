@@ -47,20 +47,20 @@ function CheckoutPage() {
   });
 
   const createPaymentMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<{ payment_url?: string; order_id?: string }> => {
       return apiClient.post('/payments/create', {
         plan_id: planId,
         billing_cycle: billingCycle,
         payment_method: paymentMethod,
-      });
+      }) as Promise<{ payment_url?: string; order_id?: string }>;
     },
     onSuccess: (data: { payment_url?: string; order_id?: string }) => {
       // Redirect to payment gateway (Toss Payments)
       if (data.payment_url) {
         window.location.href = data.payment_url;
       } else {
-        // Handle in-app payment
-        navigate({ to: '/payment/success', search: { order_id: data.order_id } });
+        // Handle in-app payment - redirect to subscription page
+        navigate({ to: '/subscription' as '/subscription' });
       }
     },
     onError: (err: Error) => {

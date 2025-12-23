@@ -58,14 +58,13 @@ function RegisterPage() {
       agreePrivacy: false,
       agreeMarketing: false,
     } as RegisterForm,
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       setError(null);
       setIsSubmitting(true);
 
       try {
         await register(value.email, value.password, value.name);
-        navigate({ to: '/login', search: { redirect: '/' } });
+        navigate({ to: '/login', search: { redirect: '' } });
       } catch (err: any) {
         setError(err.message || 'Registration failed. Please try again.');
       } finally {
@@ -132,7 +131,7 @@ function RegisterPage() {
       {/* Header */}
       <div className="flex items-center mb-6">
         <button
-          onClick={() => step > 1 ? setStep(step - 1) : navigate({ to: '/login' })}
+          onClick={() => step > 1 ? setStep(step - 1) : navigate({ to: '/login', search: { redirect: '' } })}
           className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -217,7 +216,7 @@ function RegisterPage() {
                     />
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                    <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
                   )}
                 </div>
               )}
@@ -250,7 +249,7 @@ function RegisterPage() {
                     />
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                    <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
                   )}
                 </div>
               )}
@@ -290,7 +289,7 @@ function RegisterPage() {
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                    <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
                   )}
                 </div>
               )}
@@ -336,7 +335,7 @@ function RegisterPage() {
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                    <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
                   )}
                 </div>
               )}
@@ -394,7 +393,7 @@ function RegisterPage() {
                     </button>
                   </div>
                   {field.state.meta.errors.length > 0 && (
-                    <p className="mt-1 text-sm text-red-500">{field.state.meta.errors[0]}</p>
+                    <p className="mt-1 text-sm text-red-500">{String(field.state.meta.errors[0])}</p>
                   )}
                 </div>
               )}
@@ -568,7 +567,7 @@ function RegisterPage() {
         {t('auth_already_account')}{' '}
         <button
           type="button"
-          onClick={() => navigate({ to: '/login' })}
+          onClick={() => navigate({ to: '/login', search: { redirect: '' } })}
           className="text-blue-600 font-medium hover:text-blue-700"
         >
           {t('auth_login_link')}
