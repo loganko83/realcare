@@ -26,8 +26,9 @@ test.describe('D2-01: React App Initialization', () => {
 
     await page.goto(BASE);
 
-    // Wait for React to mount
-    await page.waitForSelector('#root');
+    // Wait for React to mount and render content
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('#root > *', { timeout: 10000 });
 
     // Check that root has children (React mounted)
     const rootContent = await page.locator('#root').innerHTML();
