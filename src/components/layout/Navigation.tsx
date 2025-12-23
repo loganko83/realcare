@@ -24,12 +24,14 @@ export function Navigation() {
             <Link
               key={tab.path}
               to={tab.path}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-                isActive ? 'text-brand-600' : 'text-gray-400'
+              aria-label={t(tab.labelKey)}
+              aria-current={isActive ? 'page' : undefined}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 min-h-[48px] ${
+                isActive ? 'text-brand-700' : 'text-gray-600'
               }`}
             >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[9px] font-medium">{t(tab.labelKey)}</span>
+              <span className="text-[11px] font-medium">{t(tab.labelKey)}</span>
             </Link>
           );
         })}

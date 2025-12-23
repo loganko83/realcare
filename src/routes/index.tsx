@@ -16,9 +16,12 @@ function HomePage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold text-slate-800">{t('app_name')}</h1>
-        <button className="relative p-2 rounded-full hover:bg-slate-100">
+        <button
+          className="relative p-2 rounded-full hover:bg-slate-100"
+          aria-label="Notifications"
+        >
           <Bell size={20} className="text-slate-600" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white" aria-hidden="true"></span>
         </button>
       </div>
 
@@ -93,7 +96,7 @@ function HomePage() {
         <p className="text-slate-500 text-sm mb-4">{t('home_owner_desc')}</p>
         <Link
           to="/signals"
-          className="w-full border border-brand-200 text-brand-600 font-medium py-2.5 rounded-lg hover:bg-brand-50 transition text-sm block text-center"
+          className="w-full border border-brand-600 text-brand-700 font-semibold py-2.5 rounded-lg hover:bg-brand-50 transition text-sm block text-center"
         >
           {t('home_register_signal')}
         </Link>

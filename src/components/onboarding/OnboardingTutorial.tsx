@@ -122,24 +122,37 @@ export function OnboardingTutorial({ onComplete, onSkip }: OnboardingTutorialPro
       <div className="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="px-6 pt-4 flex justify-between items-center">
-          <div className="flex gap-1.5">
-            {ONBOARDING_STEPS.map((_, idx) => (
+          <div className="flex gap-1.5" role="tablist" aria-label="Onboarding steps">
+            {ONBOARDING_STEPS.map((s, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentStep(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                aria-label={`Step ${idx + 1}: ${s.title}`}
+                aria-selected={idx === currentStep}
+                role="tab"
+                className={`h-6 flex items-center justify-center rounded-full transition-all duration-300 ${
                   idx === currentStep
-                    ? 'w-6 bg-brand-600'
+                    ? 'w-8 bg-brand-600'
                     : idx < currentStep
-                      ? 'w-1.5 bg-brand-300'
-                      : 'w-1.5 bg-gray-200'
+                      ? 'w-6 bg-brand-300'
+                      : 'w-6 bg-gray-200'
                 }`}
-              />
+              >
+                <span className={`block rounded-full ${
+                  idx === currentStep ? 'w-6 h-1.5' : 'w-1.5 h-1.5'
+                } ${
+                  idx === currentStep
+                    ? 'bg-white'
+                    : idx < currentStep
+                      ? 'bg-brand-600'
+                      : 'bg-gray-400'
+                }`} />
+              </button>
             ))}
           </div>
           <button
             onClick={handleSkip}
-            className="text-sm text-slate-400 hover:text-slate-600 transition"
+            className="text-sm text-slate-600 hover:text-slate-800 transition font-medium"
           >
             Skip
           </button>
@@ -195,7 +208,7 @@ export function OnboardingTutorial({ onComplete, onSkip }: OnboardingTutorialPro
           )}
           <button
             onClick={handleNext}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand-700 text-white font-bold rounded-xl hover:bg-brand-800 transition"
           >
             {isLastStep ? (
               <>
