@@ -2,6 +2,14 @@ import { test, expect } from '@playwright/test';
 
 const BASE = '/real/';
 
+// Helper to dismiss onboarding modal if present
+async function dismissOnboarding(page: import('@playwright/test').Page) {
+  // Set localStorage to skip onboarding before navigation
+  await page.addInitScript(() => {
+    localStorage.setItem('realcare_onboarding_complete', 'true');
+  });
+}
+
 // =============================================================================
 // D2: Frontend Runtime Tests
 // =============================================================================
@@ -61,6 +69,7 @@ test.describe('D2-02: TanStack Router Navigation', () => {
   });
 
   test('should navigate via bottom navigation', async ({ page }) => {
+    await dismissOnboarding(page);
     await page.goto(BASE);
     await page.waitForLoadState('networkidle');
 
@@ -213,6 +222,7 @@ test.describe('D3-02: Contract Analysis (UI only)', () => {
 
 test.describe('D3-03: Gemini API Live Test', () => {
   test('should analyze contract text with Gemini', async ({ page }) => {
+    await dismissOnboarding(page);
     await page.goto(`${BASE}contract`);
     await page.waitForLoadState('networkidle');
 
