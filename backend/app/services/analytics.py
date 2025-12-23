@@ -59,7 +59,7 @@ class AnalyticsService:
         # Log for structured logging pipeline
         logger.info(
             "analytics_event",
-            event=event_name,
+            event_name=event_name,
             user_id=user_id,
             properties=properties
         )
