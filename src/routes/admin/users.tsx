@@ -29,7 +29,6 @@ interface User {
   phone?: string;
   role: 'user' | 'agent' | 'admin';
   is_active: boolean;
-  is_banned: boolean;
   created_at: string;
   last_login?: string;
   subscription_status?: 'free' | 'premium';
@@ -39,10 +38,12 @@ interface User {
 
 interface UsersListResponse {
   users: User[];
-  total: number;
-  page: number;
-  per_page: number;
-  total_pages: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 }
 
 export const Route = createFileRoute('/admin/users')({
@@ -101,13 +102,13 @@ function AdminUsersPage() {
   });
 
   const handleBanToggle = (user: User) => {
-    const action = user.is_banned ? 'unban' : 'ban';
-    const confirmMsg = user.is_banned
+    const isBanned = !user.is_active;
+    const confirmMsg = isBanned
       ? `${user.email} ${t('admin_unban_user')}?`
       : `${user.email} ${t('admin_ban_user')}?`;
 
     if (confirm(confirmMsg)) {
-      if (user.is_banned) {
+      if (isBanned) {
         unbanMutation.mutate(user.id);
       } else {
         banMutation.mutate(user.id);
@@ -143,7 +144,8 @@ function AdminUsersPage() {
   };
 
   const users = data?.users || [];
-  const totalPages = data?.total_pages || 1;
+  const totalPages = data?.pagination?.pages || 1;
+  const totalUsers = data?.pagination?.total || 0;
 
   return (
     <ProtectedRoute requiredRole="admin">
@@ -161,7 +163,7 @@ function AdminUsersPage() {
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-gray-900">{t('admin_users')}</h1>
                 <p className="text-sm text-gray-500">
-                  {data?.total.toLocaleString() || 0} {t('admin_total_users')}
+                  {totalUsers.toLocaleString()} {t('admin_total_users')}
                 </p>
               </div>
             </div>
@@ -241,7 +243,7 @@ function AdminUsersPage() {
                       </div>
                     </div>
                     <div className="shrink-0">
-                      {user.is_banned ? (
+                      {!user.is_active ? (
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-medium">
                           <Ban className="w-3 h-3" />
                           {t('admin_user_banned')}
@@ -280,12 +282,12 @@ function AdminUsersPage() {
                       onClick={() => handleBanToggle(user)}
                       disabled={banMutation.isPending || unbanMutation.isPending}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                        user.is_banned
+                        !user.is_active
                           ? 'bg-green-50 text-green-700 hover:bg-green-100'
                           : 'bg-red-50 text-red-700 hover:bg-red-100'
                       }`}
                     >
-                      {user.is_banned ? t('admin_unban_user') : t('admin_ban_user')}
+                      {!user.is_active ? t('admin_unban_user') : t('admin_ban_user')}
                     </button>
                   </div>
                 </div>
@@ -371,7 +373,7 @@ function AdminUsersPage() {
                     {t('admin_user_status')}
                   </label>
                   <p className="mt-1">
-                    {selectedUser.is_banned ? (
+                    {!selectedUser.is_active ? (
                       <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
                         <Ban className="w-4 h-4" />
                         {t('admin_user_banned')}
