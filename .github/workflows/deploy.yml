@@ -63,7 +63,7 @@ jobs:
 
             # Restart backend service
             echo "Restarting backend service..."
-            sudo systemctl restart realcare-backend
+            sudo systemctl restart realcare-api
 
             # Build and deploy frontend
             echo "Building frontend..."
