@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDMixin
@@ -74,8 +74,8 @@ class Agent(Base, UUIDMixin, TimestampMixin):
 
     # Statistics
     total_deals: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    success_rate: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
-    rating: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
+    success_rate: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     review_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Subscription
@@ -118,7 +118,7 @@ class AgentListing(Base, UUIDMixin, TimestampMixin):
     monthly_rent: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Details
-    size_sqm: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
+    size_sqm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     rooms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     bathrooms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     floor: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -159,7 +159,7 @@ class AgentSignalResponse(Base, UUIDMixin, TimestampMixin):
     # Response content
     message: Mapped[str] = mapped_column(Text, nullable=False)
     proposed_price: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    commission_rate: Mapped[Optional[float]] = mapped_column(Integer, nullable=True)
+    commission_rate: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     # Status
     status: Mapped[str] = mapped_column(String(50), default="pending", nullable=False)

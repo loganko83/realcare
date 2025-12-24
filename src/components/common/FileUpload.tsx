@@ -64,13 +64,19 @@ export function FileUpload({
     setUploading(true);
     setProgress(0);
 
+    // AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', folder);
 
-      // Simulate progress
-      const progressInterval = setInterval(() => {
+      // Simulate progress with cleanup tracking
+      progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 100);
 
@@ -79,9 +85,8 @@ export function FileUpload({
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
+        signal: controller.signal,
       });
-
-      clearInterval(progressInterval);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -101,8 +106,17 @@ export function FileUpload({
 
       onUpload(data.url, data.filename || file.name);
     } catch (err) {
-      onError?.(err instanceof Error ? err.message : '업로드에 실패했습니다');
+      if (err instanceof Error && err.name === 'AbortError') {
+        onError?.('Upload timed out. Please try again.');
+      } else {
+        onError?.(err instanceof Error ? err.message : 'Upload failed');
+      }
     } finally {
+      // Cleanup: always clear interval and timeout
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      clearTimeout(timeoutId);
       setUploading(false);
       setProgress(0);
     }

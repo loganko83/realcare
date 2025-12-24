@@ -33,16 +33,17 @@ function SettingsPage() {
     endDate: ''
   });
 
+  // Load contracts only once on mount
   useEffect(() => {
     const saved = localStorage.getItem('realcare_my_contracts');
     if (saved) {
       const parsed = JSON.parse(saved);
       setContracts(parsed);
-      checkNotifications(parsed);
     } else {
+      // Create mock data with neutral address (will be displayed based on current lang)
       const mock: ContractHistory = {
         id: 1,
-        address: lang === 'ko' ? '서울 마포구 공덕동 래미안 304호' : 'Seoul Mapo-gu Gongdeok-dong Raemian 304',
+        address: 'Seoul Mapo-gu Gongdeok-dong Raemian 304',
         type: 'jeonse',
         deposit: 50000,
         rent: 0,
@@ -52,9 +53,15 @@ function SettingsPage() {
       };
       setContracts([mock]);
       localStorage.setItem('realcare_my_contracts', JSON.stringify([mock]));
-      checkNotifications([mock]);
     }
-  }, [lang]);
+  }, []);
+
+  // Update notifications when contracts or language changes
+  useEffect(() => {
+    if (contracts.length > 0) {
+      checkNotifications(contracts);
+    }
+  }, [contracts, lang]);
 
   const checkNotifications = (list: ContractHistory[]) => {
     const alerts: string[] = [];

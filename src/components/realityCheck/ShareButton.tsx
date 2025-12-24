@@ -3,7 +3,7 @@
  * Provides multiple sharing options for Reality Check results
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Share2, Copy, Check, MessageCircle, Link2 } from 'lucide-react';
 import {
   generateShareUrl,
@@ -24,6 +24,7 @@ export function ShareButton({ state, score, className = '' }: ShareButtonProps) 
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const shareUrl = generateShareUrl(state);
   const shareTitle = 'My Reality Check Score';
@@ -40,6 +41,15 @@ export function ShareButton({ state, score, className = '' }: ShareButtonProps) 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleShare = async () => {
     // Try native share first (mobile)
     const shared = await shareViaWebShare(shareTitle, shareDescription, shareUrl);
@@ -48,13 +58,16 @@ export function ShareButton({ state, score, className = '' }: ShareButtonProps) 
     }
   };
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = useCallback(async () => {
     const success = await copyToClipboard(shareUrl);
     if (success) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }, [shareUrl]);
 
   const handleKakaoShare = () => {
     shareViaKakao(shareTitle, shareDescription, shareUrl);
@@ -110,15 +123,28 @@ export function ShareButton({ state, score, className = '' }: ShareButtonProps) 
  */
 export function ShareButtonCompact({ state, score }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shareUrl = generateShareUrl(state);
 
-  const handleCopy = async () => {
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleCopy = useCallback(async () => {
     const success = await copyToClipboard(shareUrl);
     if (success) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }, [shareUrl]);
 
   return (
     <button

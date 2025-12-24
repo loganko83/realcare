@@ -4,7 +4,7 @@
  */
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -70,6 +70,16 @@ function WalletPage() {
 
   const [activeTab, setActiveTab] = useState<'wallet' | 'credentials' | 'contracts'>('wallet');
   const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const { data, isLoading } = useQuery<WalletData>({
     queryKey: ['wallet'],
@@ -96,13 +106,16 @@ function WalletPage() {
     },
   });
 
-  const handleCopyDID = () => {
+  const handleCopyDID = useCallback(() => {
     if (data?.wallet?.did) {
       navigator.clipboard.writeText(data.wallet.did);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }, [data?.wallet?.did]);
 
   const truncateDID = (did: string) => {
     if (did.length <= 30) return did;

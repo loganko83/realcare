@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { FileText, Check, AlertTriangle, Loader2, X, Camera, Image as ImageIcon, Save, CheckCircle, File, Share2, AlignLeft, Download, RefreshCw } from 'lucide-react';
 import { useContractAnalysis, useSaveAnalysis } from '../lib/hooks/useContractAnalysis';
 import { useTranslation } from '../lib/i18n/useTranslation';
@@ -36,6 +36,16 @@ function ContractPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const shareTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (shareTimeoutRef.current) {
+        clearTimeout(shareTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const { mutate: analyzeContract, isPending: loading } = useContractAnalysis();
   const { mutate: saveAnalysis } = useSaveAnalysis();
@@ -268,7 +278,10 @@ function ContractPage() {
       try {
         await navigator.clipboard.writeText(`${shareText}\n\n${window.location.href}`);
         setShareStatus('copied');
-        setTimeout(() => setShareStatus('idle'), 2000);
+        if (shareTimeoutRef.current) {
+          clearTimeout(shareTimeoutRef.current);
+        }
+        shareTimeoutRef.current = setTimeout(() => setShareStatus('idle'), 2000);
       } catch (err) {
         console.error('Failed to copy:', err);
       }

@@ -21,22 +21,24 @@ export function ProtectedRoute({
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Combined auth check: redirect to login if not authenticated, or home if missing role
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
       const currentPath = window.location.pathname;
       navigate({
         to: redirectTo,
         search: { redirect: currentPath },
       });
+      return;
     }
-  }, [isAuthenticated, isLoading, navigate, redirectTo]);
 
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && requiredRole && user?.role !== requiredRole) {
+    if (requiredRole && user?.role !== requiredRole) {
       // User doesn't have required role
       navigate({ to: '/' });
     }
-  }, [isAuthenticated, isLoading, navigate, requiredRole, user?.role]);
+  }, [isAuthenticated, isLoading, navigate, redirectTo, requiredRole, user?.role]);
 
   if (isLoading) {
     return (

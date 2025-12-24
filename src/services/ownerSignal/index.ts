@@ -80,12 +80,30 @@ export function useMySignals() {
   });
 }
 
+// Serialize filters for stable queryKey
+function serializeFilters(filters?: SignalFilters): string {
+  if (!filters) return '';
+  return JSON.stringify({
+    signalType: filters.signalType ?? null,
+    propertyType: filters.propertyType ?? null,
+    district: filters.district ?? null,
+    minPrice: filters.minPrice ?? null,
+    maxPrice: filters.maxPrice ?? null,
+    minArea: filters.minArea ?? null,
+    maxArea: filters.maxArea ?? null,
+    urgency: filters.urgency ?? null,
+  });
+}
+
 /**
  * Get public signals with filters
  */
 export function usePublicSignals(filters?: SignalFilters) {
+  // Serialize filters for stable queryKey (prevents infinite refetches)
+  const serializedFilters = serializeFilters(filters);
+
   return useQuery({
-    queryKey: ['publicSignals', filters],
+    queryKey: ['publicSignals', serializedFilters],
     queryFn: async () => {
       const signals = getSignals();
       const now = new Date().toISOString();

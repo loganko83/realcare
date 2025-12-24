@@ -3,7 +3,7 @@
  * Kakao Maps integration for property location selection
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react';
 
@@ -38,9 +38,15 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
+  // Track if search should be skipped (e.g., after map click sets address)
+  const skipNextSearchRef = useRef(false);
+  // Track latest search query for async callbacks
+  const searchQueryRef = useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
+
   // Perform address search
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim() || loading) return;
+  const handleSearch = useCallback((query: string) => {
+    if (!query.trim() || loading) return;
 
     setIsSearching(true);
     setShowResults(true);
@@ -50,12 +56,18 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
       const places = new window.kakao.maps.services.Places();
 
       // Search by keyword
-      places.keywordSearch(searchQuery, (results: SearchResult[], status: string) => {
+      places.keywordSearch(query, (results: SearchResult[], status: string) => {
+        // Check if query is still current (prevent race condition)
+        if (query !== searchQueryRef.current) return;
+
         if (status === window.kakao.maps.services.Status.OK && results.length > 0) {
           setSearchResults(results.slice(0, 5));
         } else {
           // Fallback to address search
-          geocoder.addressSearch(searchQuery, (addressResults: SearchResult[], addressStatus: string) => {
+          geocoder.addressSearch(query, (addressResults: SearchResult[], addressStatus: string) => {
+            // Check if query is still current
+            if (query !== searchQueryRef.current) return;
+
             if (addressStatus === window.kakao.maps.services.Status.OK) {
               setSearchResults(addressResults.slice(0, 5));
             } else {
@@ -69,12 +81,15 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
       console.error('Search error:', error);
       setIsSearching(false);
     }
-  }, [searchQuery, loading]);
+  }, [loading]);
 
   // Select search result
   const handleSelectResult = (result: SearchResult) => {
     const lat = parseFloat(result.y);
     const lng = parseFloat(result.x);
+
+    // Skip next search since we're setting address from selection
+    skipNextSearchRef.current = true;
 
     setCenter({ lat, lng });
     setMarker({ lat, lng });
@@ -97,6 +112,8 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
         if (status === window.kakao.maps.services.Status.OK && results[0]) {
           const address = results[0].road_address?.address_name || results[0].address?.address_name || '';
           setSelectedAddress(address);
+          // Skip next search since address is from map click
+          skipNextSearchRef.current = true;
           setSearchQuery(address);
         }
       });
@@ -119,6 +136,8 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
               if (status === window.kakao.maps.services.Status.OK && results[0]) {
                 const address = results[0].road_address?.address_name || results[0].address?.address_name || '';
                 setSelectedAddress(address);
+                // Skip next search since address is from geolocation
+                skipNextSearchRef.current = true;
                 setSearchQuery(address);
               }
             });
@@ -157,9 +176,15 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
 
   // Debounced search on input
   useEffect(() => {
+    // Skip if address was set programmatically (map click, selection, geolocation)
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
+
     const timer = setTimeout(() => {
       if (searchQuery.length >= 2) {
-        handleSearch();
+        handleSearch(searchQuery);
       }
     }, 500);
 

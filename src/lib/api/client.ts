@@ -19,6 +19,7 @@ interface RequestOptions extends RequestInit {
 class ApiClient {
   private accessToken: string | null = null;
   private refreshToken: string | null = null;
+  private refreshPromise: Promise<boolean> | null = null;
 
   constructor() {
     // Load tokens from localStorage
@@ -49,22 +50,37 @@ class ApiClient {
       return false;
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/refresh?refresh_token=${this.refreshToken}`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        const tokens: TokenPair = await response.json();
-        this.setTokens(tokens);
-        return true;
-      }
-    } catch (error) {
-      console.error('Token refresh failed:', error);
+    // If refresh is already in progress, wait for it
+    if (this.refreshPromise) {
+      return this.refreshPromise;
     }
 
-    this.clearTokens();
-    return false;
+    // Create a new refresh promise
+    this.refreshPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/refresh?refresh_token=${this.refreshToken}`, {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          const tokens: TokenPair = await response.json();
+          this.setTokens(tokens);
+          return true;
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+      }
+
+      this.clearTokens();
+      return false;
+    })();
+
+    try {
+      return await this.refreshPromise;
+    } finally {
+      // Clear the promise after completion
+      this.refreshPromise = null;
+    }
   }
 
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {

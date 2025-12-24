@@ -38,11 +38,16 @@ class PaymentCreateRequest(BaseModel):
 
 
 class PaymentProcessRequest(BaseModel):
-    """Payment processing request."""
+    """Payment processing request.
+
+    SECURITY NOTE: Never pass raw card data (card_number, cvv, expiry) to this endpoint.
+    Use payment gateway's tokenization (payment_token) from frontend SDK.
+    """
     gateway: str = Field(..., description="inicis, kakao, naver, toss")
-    card_number: Optional[str] = None
-    expiry: Optional[str] = None
-    cvv: Optional[str] = None
+    # Use tokenized payment from gateway's frontend SDK - never raw card data
+    payment_token: Optional[str] = Field(None, description="Tokenized payment from gateway SDK")
+    # Gateway-specific order/transaction ID from frontend
+    order_id: Optional[str] = Field(None, description="Order ID from gateway")
 
 
 class PaymentResponse(BaseModel):
@@ -203,6 +208,13 @@ async def process_payment(
 
     if not payment:
         raise HTTPException(status_code=404, detail="Payment not found")
+
+    # Prevent re-processing completed or failed payments
+    if payment.status != PaymentStatus.PENDING:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot process payment with status: {payment.status.value}"
+        )
 
     try:
         payment_service = PaymentService(db)

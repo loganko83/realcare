@@ -3,9 +3,15 @@ Application Configuration
 Uses Pydantic Settings for environment variable management
 """
 
+import secrets
+import warnings
 from functools import lru_cache
 from typing import List, Optional
 from pydantic_settings import BaseSettings
+
+
+# Generate a secure random key for development (not for production!)
+_DEV_SECRET_KEY = secrets.token_urlsafe(32)
 
 
 class Settings(BaseSettings):
@@ -33,8 +39,8 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/2"
 
-    # JWT Settings
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    # JWT Settings - MUST be set via environment variable in production
+    SECRET_KEY: str = _DEV_SECRET_KEY
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -97,7 +103,18 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     """Get cached settings instance."""
-    return Settings()
+    instance = Settings()
+
+    # Warn if using development secret key in non-debug mode
+    if instance.SECRET_KEY == _DEV_SECRET_KEY and not instance.DEBUG:
+        warnings.warn(
+            "SECURITY WARNING: Using auto-generated SECRET_KEY. "
+            "Set SECRET_KEY environment variable in production!",
+            RuntimeWarning,
+            stacklevel=2
+        )
+
+    return instance
 
 
 # Global settings instance

@@ -117,9 +117,6 @@ export async function uploadDocument(
 
   documentStorage[storeType].push(docInfo);
 
-  // In production, this would upload to Gemini File Search API
-  console.log(`[FileSearch] Uploaded ${displayName} to ${store.displayName}`);
-
   return docInfo.name;
 }
 
@@ -232,5 +229,4 @@ export async function initializeStores(): Promise<void> {
   for (const type of Object.keys(STORE_CONFIGS) as StoreType[]) {
     await getOrCreateStore(type);
   }
-  console.log('[FileSearch] All stores initialized');
 }

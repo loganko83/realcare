@@ -401,8 +401,16 @@ async def respond_to_signal(
             detail="Already responded to this signal"
         )
 
-    # Check signal limit
-    if agent.signals_used_this_month >= agent.monthly_signal_limit:
+    # Lock agent row to prevent race condition on signal limit
+    agent_result = await db.execute(
+        select(Agent)
+        .where(Agent.id == agent.id)
+        .with_for_update()
+    )
+    locked_agent = agent_result.scalar_one()
+
+    # Check signal limit (with locked row)
+    if locked_agent.signals_used_this_month >= locked_agent.monthly_signal_limit:
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="Monthly signal limit reached. Please upgrade your plan."
@@ -410,14 +418,15 @@ async def respond_to_signal(
 
     # Create response
     response = AgentSignalResponse(
-        agent_id=agent.id,
+        agent_id=locked_agent.id,
         signal_id=signal_id,
         message=data.message,
         proposed_price=data.proposed_price,
         commission_rate=data.commission_rate,
     )
 
-    agent.signals_used_this_month += 1
+    # Atomic increment with locked row
+    locked_agent.signals_used_this_month += 1
     signal.interest_count += 1
 
     db.add(response)
