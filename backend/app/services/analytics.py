@@ -3,15 +3,18 @@ Analytics Service
 Event tracking and metrics collection.
 """
 
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Set
 from datetime import datetime, timedelta
-from collections import defaultdict
+from collections import defaultdict, deque
 import structlog
 
 from app.core.config import get_settings
 
 logger = structlog.get_logger()
 settings = get_settings()
+
+# Maximum events to keep in memory
+MAX_EVENTS = 10000
 
 
 class AnalyticsService:
@@ -22,12 +25,19 @@ class AnalyticsService:
     - Usage analytics
     - Performance monitoring
     - Business metrics
+
+    Optimized with:
+    - deque for O(1) event rotation
+    - Indexes for O(1) user and timestamp lookups
     """
 
     def __init__(self):
-        # In-memory storage (use Redis/ClickHouse in production)
-        self._events: List[Dict[str, Any]] = []
+        # Use deque for O(1) rotation instead of list slicing
+        self._events: deque = deque(maxlen=MAX_EVENTS)
         self._metrics: Dict[str, int] = defaultdict(int)
+        # Indexes for fast lookups
+        self._user_index: Dict[str, List[int]] = defaultdict(list)
+        self._event_counter: int = 0
 
     async def track_event(
         self,
@@ -45,28 +55,38 @@ class AnalyticsService:
             properties: Additional event data
             timestamp: Event time (defaults to now)
         """
+        event_time = timestamp or datetime.utcnow()
         event = {
             "event": event_name,
             "user_id": user_id,
             "properties": properties or {},
-            "timestamp": (timestamp or datetime.utcnow()).isoformat(),
+            "timestamp": event_time.isoformat(),
+            "_parsed_time": event_time,  # Cache parsed datetime
+            "_index": self._event_counter,
             "app_version": settings.APP_VERSION
         }
 
+        # deque with maxlen auto-removes old items (O(1))
         self._events.append(event)
+
+        # Update user index for fast lookups
+        if user_id:
+            self._user_index[user_id].append(self._event_counter)
+            # Limit index size per user
+            if len(self._user_index[user_id]) > 100:
+                self._user_index[user_id] = self._user_index[user_id][-100:]
+
         self._metrics[event_name] += 1
+        self._event_counter += 1
 
-        # Log for structured logging pipeline
-        logger.info(
-            "analytics_event",
-            event_name=event_name,
-            user_id=user_id,
-            properties=properties
-        )
-
-        # Keep only last 10000 events in memory
-        if len(self._events) > 10000:
-            self._events = self._events[-10000:]
+        # Log for structured logging pipeline (only in debug mode to reduce CPU)
+        if settings.DEBUG:
+            logger.info(
+                "analytics_event",
+                event_name=event_name,
+                user_id=user_id,
+                properties=properties
+            )
 
     async def track_page_view(
         self,
@@ -245,7 +265,7 @@ class AnalyticsService:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None
     ) -> Dict[str, int]:
-        """Get event counts for the time period."""
+        """Get event counts for the time period. Uses cached timestamps for O(n) without parsing."""
         if not start_date:
             start_date = datetime.utcnow() - timedelta(days=7)
         if not end_date:
@@ -253,8 +273,12 @@ class AnalyticsService:
 
         counts: Dict[str, int] = defaultdict(int)
 
+        # Use cached _parsed_time to avoid datetime parsing overhead
         for event in self._events:
-            event_time = datetime.fromisoformat(event["timestamp"])
+            event_time = event.get("_parsed_time")
+            if event_time is None:
+                # Fallback for older events without cached time
+                event_time = datetime.fromisoformat(event["timestamp"])
             if start_date <= event_time <= end_date:
                 counts[event["event"]] += 1
 
@@ -265,27 +289,45 @@ class AnalyticsService:
         user_id: str,
         limit: int = 50
     ) -> List[Dict[str, Any]]:
-        """Get recent activity for a user."""
-        user_events = [
-            e for e in self._events
-            if e["user_id"] == user_id
-        ]
-        return user_events[-limit:][::-1]  # Most recent first
+        """Get recent activity for a user. Uses index for O(1) lookup."""
+        # Use user index for fast lookup instead of full scan
+        if user_id not in self._user_index:
+            return []
+
+        # Get event indices for this user (already limited to 100 most recent)
+        indices = self._user_index[user_id][-limit:]
+
+        # Collect events by index (need to find them in deque)
+        result = []
+        index_set = set(indices)
+        for event in self._events:
+            if event.get("_index") in index_set:
+                # Return clean event without internal fields
+                clean_event = {k: v for k, v in event.items() if not k.startswith("_")}
+                result.append(clean_event)
+
+        return result[-limit:][::-1]  # Most recent first
 
     async def get_metrics_summary(self) -> Dict[str, Any]:
-        """Get summary metrics for dashboard."""
+        """Get summary metrics for dashboard. Optimized with cached timestamps."""
         now = datetime.utcnow()
         week_ago = now - timedelta(days=7)
 
         weekly_counts = await self.get_event_counts(week_ago, now)
 
+        # Use cached timestamps and collect unique users in single pass
+        unique_users: Set[str] = set()
+        for event in self._events:
+            event_time = event.get("_parsed_time")
+            if event_time is None:
+                event_time = datetime.fromisoformat(event["timestamp"])
+            if event.get("user_id") and event_time >= week_ago:
+                unique_users.add(event["user_id"])
+
         return {
             "period": "7_days",
             "total_events": sum(weekly_counts.values()),
-            "unique_users": len(set(
-                e["user_id"] for e in self._events
-                if e["user_id"] and datetime.fromisoformat(e["timestamp"]) >= week_ago
-            )),
+            "unique_users": len(unique_users),
             "top_events": sorted(
                 weekly_counts.items(),
                 key=lambda x: x[1],

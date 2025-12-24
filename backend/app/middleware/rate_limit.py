@@ -1,18 +1,26 @@
 """
 Rate Limiting Middleware
 Protects API from abuse using sliding window rate limiting.
+
+Optimized with:
+- collections.deque for O(1) operations
+- Lazy cleanup to reduce per-request overhead
 """
 
 import time
 from typing import Dict, Optional, Callable
+from collections import deque
 from fastapi import Request, Response, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 import structlog
 
 logger = structlog.get_logger()
 
-# In-memory store (use Redis in production)
-rate_limit_store: Dict[str, list] = {}
+# In-memory store using deque for O(1) append/popleft (use Redis in production)
+rate_limit_store: Dict[str, deque] = {}
+# Track last cleanup time
+_last_cleanup_time: float = 0
+_cleanup_interval: float = 60  # Cleanup every 60 seconds
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -79,29 +87,31 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         """
         Check if client is rate limited.
 
+        Uses deque with O(1) operations instead of list comprehension.
+
         Returns:
             (is_limited, remaining_requests)
         """
         now = time.time()
         window_start = now - self.window_seconds
 
-        # Get request timestamps for this client
+        # Get or create request timestamps for this client
         if client_id not in rate_limit_store:
-            rate_limit_store[client_id] = []
+            rate_limit_store[client_id] = deque()
 
-        # Remove old entries
-        rate_limit_store[client_id] = [
-            ts for ts in rate_limit_store[client_id]
-            if ts > window_start
-        ]
+        timestamps = rate_limit_store[client_id]
 
-        current_count = len(rate_limit_store[client_id])
+        # Remove old entries from the left (O(1) per removal with deque)
+        while timestamps and timestamps[0] <= window_start:
+            timestamps.popleft()
+
+        current_count = len(timestamps)
 
         if current_count >= limit:
             return True, 0
 
-        # Add current request
-        rate_limit_store[client_id].append(now)
+        # Add current request (O(1) append)
+        timestamps.append(now)
 
         return False, limit - current_count - 1
 
@@ -145,14 +155,24 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 def cleanup_rate_limit_store():
-    """Periodic cleanup of expired entries."""
+    """Periodic cleanup of expired entries. Uses O(1) deque operations."""
+    global _last_cleanup_time
+
     now = time.time()
+
+    # Only run cleanup if enough time has passed
+    if now - _last_cleanup_time < _cleanup_interval:
+        return
+
+    _last_cleanup_time = now
     cutoff = now - 120  # Keep entries for 2 minutes
 
+    # Iterate over copy of keys to allow deletion
     for client_id in list(rate_limit_store.keys()):
-        rate_limit_store[client_id] = [
-            ts for ts in rate_limit_store[client_id]
-            if ts > cutoff
-        ]
-        if not rate_limit_store[client_id]:
+        timestamps = rate_limit_store[client_id]
+        # O(1) popleft for each expired entry
+        while timestamps and timestamps[0] <= cutoff:
+            timestamps.popleft()
+        # Remove empty entries
+        if not timestamps:
             del rate_limit_store[client_id]

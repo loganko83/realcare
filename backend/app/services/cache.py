@@ -3,7 +3,9 @@ Redis Cache Service
 Provides caching functionality with Redis backend.
 """
 
+import asyncio
 import json
+import uuid
 from typing import Any, Optional, Union
 from datetime import timedelta
 import structlog
@@ -290,7 +292,7 @@ class CacheService:
         blocking_timeout: float = 5.0,
     ) -> Optional[str]:
         """
-        Acquire distributed lock.
+        Acquire distributed lock with exponential backoff.
 
         Args:
             name: Lock name
@@ -305,16 +307,22 @@ class CacheService:
             return None
 
         try:
-            import uuid
             token = str(uuid.uuid4())
             lock_key = self._make_key(f"lock:{name}")
 
             if blocking:
-                end_time = asyncio.get_event_loop().time() + blocking_timeout
-                while asyncio.get_event_loop().time() < end_time:
+                # Use exponential backoff to reduce CPU usage
+                loop = asyncio.get_running_loop()
+                end_time = loop.time() + blocking_timeout
+                sleep_time = 0.05  # Start with 50ms
+                max_sleep = 0.5  # Cap at 500ms
+
+                while loop.time() < end_time:
                     if await self._redis.set(lock_key, token, nx=True, ex=timeout):
                         return token
-                    await asyncio.sleep(0.1)
+                    await asyncio.sleep(sleep_time)
+                    # Exponential backoff with cap
+                    sleep_time = min(sleep_time * 2, max_sleep)
                 return None
             else:
                 if await self._redis.set(lock_key, token, nx=True, ex=timeout):
@@ -355,10 +363,6 @@ class CacheService:
         except Exception as e:
             logger.error("Lock release error", name=name, error=str(e))
             return False
-
-
-# Import asyncio for lock
-import asyncio
 
 
 # Global cache instance
