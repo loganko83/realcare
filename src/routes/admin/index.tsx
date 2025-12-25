@@ -5,7 +5,6 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import {
   Users,
@@ -99,7 +98,6 @@ function AdminDashboardPage() {
   };
 
   return (
-    <ProtectedRoute requiredRole="admin">
       <div className="min-h-screen bg-gray-50 pb-20">
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-8">
@@ -303,6 +301,5 @@ function AdminDashboardPage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }

@@ -6,7 +6,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import {
   Users,
@@ -148,7 +147,6 @@ function AdminUsersPage() {
   const totalUsers = data?.pagination?.total || 0;
 
   return (
-    <ProtectedRoute requiredRole="admin">
       <div className="min-h-screen bg-gray-50 pb-20">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -440,6 +438,5 @@ function AdminUsersPage() {
           </div>
         )}
       </div>
-    </ProtectedRoute>
   );
 }

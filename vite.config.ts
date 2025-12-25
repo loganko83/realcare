@@ -60,10 +60,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('@google/generative-ai')) {
                 return 'vendor-gemini';
               }
-              // Recharts (lazy loaded)
-              if (id.includes('recharts') || id.includes('d3-') || id.includes('victory-')) {
-                return 'vendor-charts';
-              }
+              // Recharts - don't separate, let it be code-split naturally
+              // This avoids module initialization order issues with React
+              // if (id.includes('recharts') || id.includes('d3-') || id.includes('victory-')) {
+              //   return 'vendor-charts';
+              // }
               // Lucide icons (split into own chunk)
               if (id.includes('lucide-react')) {
                 return 'vendor-icons';

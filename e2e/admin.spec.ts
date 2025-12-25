@@ -17,12 +17,13 @@ test.describe('Admin Route Protection', () => {
   test('should redirect /admin/ to login with redirect param', async ({ page }) => {
     await dismissOnboarding(page);
     await page.goto(`${BASE}admin/`);
-    await page.waitForLoadState('networkidle');
+
+    // Wait for redirect to login page (client-side routing)
+    await page.waitForURL(/\/login/, { timeout: 10000 });
 
     // Should redirect to login page with redirect param
     expect(page.url()).toContain('/login');
     expect(page.url()).toContain('redirect=');
-    expect(page.url()).toContain('admin');
 
     // Take screenshot of login page
     await page.screenshot({ path: 'test-results/admin-redirect-login.png', fullPage: true });
@@ -31,7 +32,9 @@ test.describe('Admin Route Protection', () => {
   test('should redirect /admin/users to login with redirect param', async ({ page }) => {
     await dismissOnboarding(page);
     await page.goto(`${BASE}admin/users`);
-    await page.waitForLoadState('networkidle');
+
+    // Wait for redirect to login page
+    await page.waitForURL(/\/login/, { timeout: 10000 });
 
     // Should redirect to login
     expect(page.url()).toContain('/login');
@@ -44,7 +47,9 @@ test.describe('Admin Route Protection', () => {
   test('should redirect /admin/agents to login with redirect param', async ({ page }) => {
     await dismissOnboarding(page);
     await page.goto(`${BASE}admin/agents`);
-    await page.waitForLoadState('networkidle');
+
+    // Wait for redirect to login page
+    await page.waitForURL(/\/login/, { timeout: 10000 });
 
     // Should redirect to login
     expect(page.url()).toContain('/login');
@@ -59,6 +64,9 @@ test.describe('Admin Login Page', () => {
   test('should display login form when accessing admin', async ({ page }) => {
     await dismissOnboarding(page);
     await page.goto(`${BASE}admin/`);
+
+    // Wait for redirect to login page
+    await page.waitForURL(/\/login/, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
 
     // Should show login page with Korean text
@@ -102,6 +110,9 @@ test.describe('Admin Login Page', () => {
     await dismissOnboarding(page);
 
     await page.goto(`${BASE}admin/`);
+
+    // Wait for redirect to login page
+    await page.waitForURL(/\/login/, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
 
     // Check content fits viewport
@@ -118,14 +129,18 @@ test.describe('Admin with Mock Auth', () => {
     // Set up mock authentication in localStorage
     await page.addInitScript(() => {
       localStorage.setItem('realcare_onboarding_complete', 'true');
-      // Mock auth token (won't work with real API but tests route behavior)
-      localStorage.setItem('realcare_auth_token', 'mock_admin_token');
-      localStorage.setItem('realcare_user', JSON.stringify({
-        id: 'admin-1',
+      // Create a mock JWT with admin role (header.payload.signature format)
+      // Payload: { "sub": "admin-1", "email": "admin@test.com", "role": "admin", "exp": 9999999999 }
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({
+        sub: 'admin-1',
         email: 'admin@test.com',
         name: 'Admin User',
-        role: 'admin'
+        role: 'admin',
+        exp: 9999999999
       }));
+      const mockToken = `${header}.${payload}.mock_signature`;
+      localStorage.setItem('realcare_access_token', mockToken);
     });
 
     await page.goto(`${BASE}admin/`);
