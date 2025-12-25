@@ -7,6 +7,7 @@ Optimized with:
 - Lazy cleanup to reduce per-request overhead
 """
 
+import os
 import time
 from typing import Dict, Optional, Callable
 from collections import deque
@@ -15,6 +16,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 import structlog
 
 logger = structlog.get_logger()
+
+# Disable rate limiting in test environment
+TESTING = os.environ.get("TESTING", "").lower() == "true"
 
 # In-memory store using deque for O(1) append/popleft (use Redis in production)
 rate_limit_store: Dict[str, deque] = {}
@@ -117,6 +121,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with rate limiting."""
+        # Skip rate limiting in test environment
+        if TESTING:
+            return await call_next(request)
+
         # Skip excluded paths
         path = request.url.path
         if any(path.startswith(excluded) for excluded in self.exclude_paths):

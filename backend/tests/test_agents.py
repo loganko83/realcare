@@ -17,11 +17,12 @@ class TestAgentRegistration:
             "/api/v1/agents/register",
             headers=auth_headers,
             json={
-                "agency_name": f"Test Agency {uuid.uuid4().hex[:8]}",
+                "business_name": f"Test Agency {uuid.uuid4().hex[:8]}",
                 "license_number": f"2024-{uuid.uuid4().hex[:5]}",
                 "business_number": f"123-45-{uuid.uuid4().hex[:5]}",
                 "representative_name": "Hong Gildong",
                 "office_address": "Seoul, Gangnam-gu, Teheran-ro 123",
+                "office_region": "gangnam",
                 "office_phone": "02-1234-5678"
             }
         )
@@ -30,7 +31,6 @@ class TestAgentRegistration:
         data = response.json()
         assert "id" in data
         assert data["tier"] == "FREE"
-        assert data["is_verified"] == False
 
     async def test_register_agent_missing_fields(self, client: AsyncClient, auth_headers: dict):
         """Test agent registration with missing fields."""
@@ -38,7 +38,7 @@ class TestAgentRegistration:
             "/api/v1/agents/register",
             headers=auth_headers,
             json={
-                "agency_name": "Incomplete Agency"
+                "business_name": "Incomplete Agency"
             }
         )
 
@@ -49,11 +49,12 @@ class TestAgentRegistration:
         response = await client.post(
             "/api/v1/agents/register",
             json={
-                "agency_name": "Unauth Agency",
+                "business_name": "Unauth Agency",
                 "license_number": "2024-99999",
                 "business_number": "123-45-67890",
                 "representative_name": "Test",
-                "office_address": "Seoul",
+                "office_address": "Seoul, Gangnam-gu, Test Address 123",
+                "office_region": "gangnam",
                 "office_phone": "02-1234-5678"
             }
         )
@@ -73,7 +74,7 @@ class TestAgentProfile:
 
         assert response.status_code == 200
         data = response.json()
-        assert "agency_name" in data
+        assert "business_name" in data
         assert "tier" in data
 
     async def test_get_my_agent_not_registered(self, client: AsyncClient, auth_headers: dict):

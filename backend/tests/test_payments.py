@@ -92,8 +92,7 @@ class TestSubscriptionOperations:
             headers=auth_headers,
             json={
                 "plan": "basic",
-                "billing_cycle": "monthly",
-                "payment_method": "card"
+                "billing_cycle": "monthly"
             }
         )
 

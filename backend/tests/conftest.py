@@ -5,12 +5,11 @@ Shared test fixtures for RealCare backend tests.
 
 import os
 import pytest
-import asyncio
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-# Set test environment
+# Set test environment before importing app
 os.environ["TESTING"] = "true"
 os.environ["DATABASE_URL"] = "postgresql+asyncpg://realcare:realcare@localhost:5432/realcare_test"
 
@@ -25,21 +24,15 @@ TEST_DATABASE_URL = os.environ.get(
 )
 
 
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create event loop for async tests."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture
 async def test_engine():
-    """Create test database engine."""
+    """Create test database engine for each test."""
     engine = create_async_engine(
         TEST_DATABASE_URL,
         echo=False,
-        pool_pre_ping=True
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10
     )
 
     # Create tables
@@ -48,7 +41,7 @@ async def test_engine():
 
     yield engine
 
-    # Drop tables after all tests
+    # Cleanup after test
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
@@ -61,12 +54,16 @@ async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
     async_session_factory = async_sessionmaker(
         test_engine,
         class_=AsyncSession,
-        expire_on_commit=False
+        expire_on_commit=False,
+        autoflush=False
     )
 
     async with async_session_factory() as session:
-        yield session
-        await session.rollback()
+        try:
+            yield session
+        finally:
+            await session.rollback()
+            await session.close()
 
 
 @pytest.fixture
@@ -128,14 +125,17 @@ async def agent_headers(client: AsyncClient, auth_headers: dict) -> dict:
         "/api/v1/agents/register",
         headers=auth_headers,
         json={
-            "agency_name": f"Test Agency {uuid.uuid4().hex[:8]}",
+            "business_name": f"Test Agency {uuid.uuid4().hex[:8]}",
             "license_number": f"2024-{uuid.uuid4().hex[:5]}",
             "business_number": f"123-{uuid.uuid4().hex[:2]}-{uuid.uuid4().hex[:5]}",
             "representative_name": "Test Representative",
-            "office_address": "Seoul, Gangnam, Test Building",
+            "office_address": "Seoul, Gangnam-gu, Test Building 123",
+            "office_region": "gangnam",
             "office_phone": "02-1234-5678"
         }
     )
 
-    # Agent registration might fail if already registered, but that's okay
+    if response.status_code not in [200, 201]:
+        pytest.fail(f"Failed to register agent: {response.status_code} - {response.text}")
+
     return auth_headers
