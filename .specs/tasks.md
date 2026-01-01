@@ -321,7 +321,7 @@ For each task:
 
 ---
 
-## Phase 13: System Remediation (IN PROGRESS)
+## Phase 13: System Remediation (DONE)
 
 > Details: `.specs/phase-13-remediation.md`
 
@@ -341,15 +341,60 @@ For each task:
 | P13-02-E | Fix pdfBranding type issues | DONE |
 | P13-02-F | Fix taxCalculator missing limit property | DONE |
 | P13-02-G | Install @types/react and @types/react-dom | DONE |
-| P13-02-H | Remaining TypeScript strict mode errors | PENDING (non-blocking) |
+| P13-02-H | Remaining TypeScript strict mode errors | DONE |
 
 ### Sprint 13.3: API Integration
 | ID | Task | Status |
 |----|------|--------|
 | P13-03-A | Update RealityCheckForm input format | DONE |
-| P13-03-B | Connect frontend to backend API | PENDING (optional) |
+| P13-03-B | Connect frontend to backend API | DONE |
 
-### Server Deployment Required
-1. Deploy updated `ecosystem.config.cjs` with SECRET_KEY
-2. Restart PM2 service
-3. Register Google OAuth redirect URI in Google Console
+---
+
+## Phase 14: Comprehensive System Improvements (DONE)
+
+> Details: `.specs/phase-14-comprehensive-improvements.md`
+> Updated: 2026-01-01
+
+### Sprint 14.1: Critical Security Fixes (P0)
+| ID | Task | Status |
+|----|------|--------|
+| P14-01-A | Move refresh token from query to POST body | DONE |
+| P14-01-B | Fix CI/CD deploy dependency (workflow_run) | DONE |
+| P14-01-C | Add signal_interests table indexes | DONE |
+
+### Sprint 14.2: Core Feature Implementation (P1)
+| ID | Task | Status |
+|----|------|--------|
+| P14-02-A | Owner Signals DB CRUD implementation | DONE |
+| P14-02-B | Contracts DB CRUD implementation | DONE |
+| P14-02-C | OAuth callback implementation (Kakao/Naver/Google) | DONE |
+| P14-02-D | Gemini AI integration for contract analysis | DONE |
+| P14-02-E | Fix Payment FK constraint (CASCADE -> RESTRICT) | DONE |
+
+### Sprint 14.3: Medium Priority Improvements (P2)
+| ID | Task | Status |
+|----|------|--------|
+| P14-03-A | Token blacklist implementation | DONE |
+| P14-03-B | Enhanced health checks (DB + Redis) | DONE |
+| P14-03-C | Rate limiter improvement (user ID extraction) | DONE |
+| P14-03-D | Verified agent test fixture | DONE |
+| P14-03-E | Admin user test fixture | DONE |
+
+### Files Changed
+- `backend/app/api/v1/endpoints/auth.py` - Refresh token security, logout blacklist
+- `backend/app/api/v1/endpoints/signals.py` - Full DB CRUD
+- `backend/app/api/v1/endpoints/contracts.py` - Full DB CRUD
+- `backend/app/api/v1/endpoints/oauth.py` - Fixed user model fields
+- `backend/app/api/v1/endpoints/health.py` - Redis check, K8s endpoints
+- `backend/app/repositories/signal.py` - New repository
+- `backend/app/repositories/contract.py` - New repository
+- `backend/app/services/signal.py` - New service
+- `backend/app/services/contract.py` - New service with timeline generation
+- `backend/app/services/gemini.py` - New AI service
+- `backend/app/core/security.py` - Token blacklist
+- `backend/app/middleware/rate_limit.py` - User ID extraction
+- `backend/app/schemas/user.py` - RefreshTokenRequest schema
+- `backend/alembic/versions/005_*.py` - Indexes and FK fix
+- `.github/workflows/deploy.yml` - CI dependency
+- `backend/tests/conftest.py` - Verified agent, admin fixtures

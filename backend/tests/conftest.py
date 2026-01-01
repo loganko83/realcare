@@ -13,8 +13,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 os.environ["TESTING"] = "true"
 os.environ["DATABASE_URL"] = "postgresql+asyncpg://realcare:realcare@localhost:5432/realcare_test"
 
-from app.main import app
+from app.main import app as fastapi_app
 from app.core.database import get_db, Base
+import app.models  # Ensure models are registered with Base.metadata
 
 
 # Test database URL - use separate test database
@@ -73,15 +74,15 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     async def override_get_db():
         yield db_session
 
-    app.dependency_overrides[get_db] = override_get_db
+    fastapi_app.dependency_overrides[get_db] = override_get_db
 
     async with AsyncClient(
-        transport=ASGITransport(app=app),
+        transport=ASGITransport(app=fastapi_app),
         base_url="http://test"
     ) as ac:
         yield ac
 
-    app.dependency_overrides.clear()
+    fastapi_app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -117,7 +118,7 @@ async def auth_headers(client: AsyncClient) -> dict:
 
 @pytest.fixture
 async def agent_headers(client: AsyncClient, auth_headers: dict) -> dict:
-    """Get authenticated agent headers."""
+    """Get authenticated agent headers (PENDING status)."""
     import uuid
 
     # Register as agent
@@ -139,3 +140,93 @@ async def agent_headers(client: AsyncClient, auth_headers: dict) -> dict:
         pytest.fail(f"Failed to register agent: {response.status_code} - {response.text}")
 
     return auth_headers
+
+
+@pytest.fixture
+async def verified_agent_headers(
+    client: AsyncClient,
+    auth_headers: dict,
+    db_session: AsyncSession
+) -> dict:
+    """Get authenticated agent headers with VERIFIED status."""
+    import uuid
+    from datetime import datetime, timezone
+    from sqlalchemy import select, update
+    from app.models.agent import Agent, AgentStatus
+
+    # Register as agent
+    response = await client.post(
+        "/api/v1/agents/register",
+        headers=auth_headers,
+        json={
+            "business_name": f"Verified Agency {uuid.uuid4().hex[:8]}",
+            "license_number": f"VER-{uuid.uuid4().hex[:5]}",
+            "business_number": f"999-{uuid.uuid4().hex[:2]}-{uuid.uuid4().hex[:5]}",
+            "representative_name": "Verified Representative",
+            "office_address": "Seoul, Gangnam-gu, Premium Building 456",
+            "office_region": "gangnam",
+            "office_phone": "02-9999-8888"
+        }
+    )
+
+    if response.status_code not in [200, 201]:
+        pytest.fail(f"Failed to register agent: {response.status_code} - {response.text}")
+
+    agent_data = response.json()
+    agent_id = agent_data.get("id")
+
+    # Update agent status to VERIFIED in database
+    await db_session.execute(
+        update(Agent)
+        .where(Agent.id == agent_id)
+        .values(
+            status=AgentStatus.VERIFIED,
+            verified_at=datetime.now(timezone.utc)
+        )
+    )
+    await db_session.commit()
+
+    return auth_headers
+
+
+@pytest.fixture
+async def admin_headers(client: AsyncClient, db_session: AsyncSession) -> dict:
+    """Get authenticated admin user headers."""
+    import uuid
+    from sqlalchemy import update
+    from app.models.user import User, UserRole
+
+    unique_email = f"admin_{uuid.uuid4().hex[:8]}@example.com"
+
+    # Register admin user
+    register_response = await client.post("/api/v1/auth/register", json={
+        "email": unique_email,
+        "password": "AdminPass123!",
+        "name": "Admin User"
+    })
+
+    if register_response.status_code != 201:
+        pytest.fail(f"Failed to register admin: {register_response.text}")
+
+    user_data = register_response.json()
+    user_id = user_data.get("id")
+
+    # Update user role to ADMIN in database
+    await db_session.execute(
+        update(User)
+        .where(User.id == user_id)
+        .values(role=UserRole.ADMIN)
+    )
+    await db_session.commit()
+
+    # Login
+    response = await client.post("/api/v1/auth/login/json", json={
+        "email": unique_email,
+        "password": "AdminPass123!"
+    })
+
+    if response.status_code != 200:
+        pytest.fail(f"Failed to login as admin: {response.text}")
+
+    tokens = response.json()
+    return {"Authorization": f"Bearer {tokens['access_token']}"}

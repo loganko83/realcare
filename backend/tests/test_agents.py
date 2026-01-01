@@ -65,8 +65,8 @@ class TestAgentRegistration:
 class TestAgentProfile:
     """Test agent profile operations."""
 
-    async def test_get_my_agent(self, client: AsyncClient, agent_headers: dict):
-        """Test getting own agent profile - requires verification."""
+    async def test_get_my_agent_pending(self, client: AsyncClient, agent_headers: dict):
+        """Test getting own agent profile - pending agent gets 403."""
         response = await client.get(
             "/api/v1/agents/me",
             headers=agent_headers
@@ -74,6 +74,19 @@ class TestAgentProfile:
 
         # Agent is PENDING (not VERIFIED), so 403 is expected
         assert response.status_code == 403
+
+    async def test_get_my_agent_verified(self, client: AsyncClient, verified_agent_headers: dict):
+        """Test getting own agent profile - verified agent gets profile."""
+        response = await client.get(
+            "/api/v1/agents/me",
+            headers=verified_agent_headers
+        )
+
+        # Verified agent should get their profile
+        assert response.status_code == 200
+        data = response.json()
+        assert "id" in data
+        assert "status" in data
 
     async def test_get_my_agent_not_registered(self, client: AsyncClient, auth_headers: dict):
         """Test getting agent profile when not registered as agent."""
@@ -100,8 +113,8 @@ class TestAgentProfile:
 class TestAgentDashboard:
     """Test agent dashboard."""
 
-    async def test_get_dashboard(self, client: AsyncClient, agent_headers: dict):
-        """Test getting agent dashboard - requires verification."""
+    async def test_get_dashboard_pending(self, client: AsyncClient, agent_headers: dict):
+        """Test getting agent dashboard - pending agent gets 403."""
         response = await client.get(
             "/api/v1/agents/dashboard",
             headers=agent_headers
@@ -110,12 +123,24 @@ class TestAgentDashboard:
         # Agent is PENDING, so 403 is expected
         assert response.status_code == 403
 
+    async def test_get_dashboard_verified(self, client: AsyncClient, verified_agent_headers: dict):
+        """Test getting agent dashboard - verified agent succeeds."""
+        response = await client.get(
+            "/api/v1/agents/dashboard",
+            headers=verified_agent_headers
+        )
+
+        # Verified agent should get dashboard
+        assert response.status_code == 200
+        data = response.json()
+        assert "agent" in data or "stats" in data or "listings" in data
+
 
 class TestAgentListings:
     """Test agent listings management."""
 
-    async def test_create_listing(self, client: AsyncClient, agent_headers: dict):
-        """Test creating a new listing - requires verified agent."""
+    async def test_create_listing_pending(self, client: AsyncClient, agent_headers: dict):
+        """Test creating a new listing - pending agent gets 403."""
         response = await client.post(
             "/api/v1/agents/listings",
             headers=agent_headers,
@@ -134,6 +159,27 @@ class TestAgentListings:
 
         # Agent is PENDING, so 403 is expected
         assert response.status_code == 403
+
+    async def test_create_listing_verified(self, client: AsyncClient, verified_agent_headers: dict):
+        """Test creating a new listing - verified agent succeeds."""
+        response = await client.post(
+            "/api/v1/agents/listings",
+            headers=verified_agent_headers,
+            json={
+                "property_type": "apartment",
+                "transaction_type": "sale",
+                "title": "Verified Agent Listing",
+                "address": "Seoul, Gangnam, Premium Building 202",
+                "price": 750000000,
+                "area_sqm": 95,
+                "floor": 15,
+                "total_floors": 30,
+                "description": "Premium apartment from verified agent"
+            }
+        )
+
+        # Verified agent should be able to create listings
+        assert response.status_code in [200, 201]
 
     async def test_get_my_listings(self, client: AsyncClient, agent_headers: dict):
         """Test getting own listings."""

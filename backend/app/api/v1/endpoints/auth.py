@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.user import AuthProvider
-from app.schemas.user import UserCreate, UserResponse, UserLogin, Token
+from app.schemas.user import UserCreate, UserResponse, UserLogin, Token, RefreshTokenRequest
 from app.services.auth import AuthService
 
 router = APIRouter()
@@ -75,15 +75,16 @@ async def login_json(
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(
-    refresh_token: str,
+    request: RefreshTokenRequest,
     auth_service: AuthService = Depends(get_auth_service),
 ):
     """
     Refresh access token.
 
+    Accepts refresh token in POST body for security (not query parameter).
     Returns new access and refresh tokens.
     """
-    return await auth_service.refresh_tokens(refresh_token)
+    return await auth_service.refresh_tokens(request.refresh_token)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -96,51 +97,24 @@ async def get_me(current_user: UserResponse = Depends(get_current_user)):
     return current_user
 
 
-@router.post("/kakao/callback", response_model=Token)
-async def kakao_callback(
-    code: str,
-    auth_service: AuthService = Depends(get_auth_service),
-):
-    """
-    Kakao OAuth callback.
-
-    Exchanges authorization code for tokens and user info.
-    """
-    # TODO: Implement Kakao OAuth
-    # 1. Exchange code for access token
-    # 2. Get user info from Kakao
-    # 3. Create/update user and return tokens
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Kakao OAuth not yet implemented"
-    )
-
-
-@router.post("/naver/callback", response_model=Token)
-async def naver_callback(
-    code: str,
-    state: str,
-    auth_service: AuthService = Depends(get_auth_service),
-):
-    """
-    Naver OAuth callback.
-
-    Exchanges authorization code for tokens and user info.
-    """
-    # TODO: Implement Naver OAuth
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Naver OAuth not yet implemented"
-    )
+# OAuth callbacks are handled by /api/v1/auth/social/{provider}/callback
+# See app/api/v1/endpoints/oauth.py for implementation
 
 
 @router.post("/logout")
-async def logout(current_user: UserResponse = Depends(get_current_user)):
+async def logout(
+    token: str = Depends(oauth2_scheme),
+    current_user: UserResponse = Depends(get_current_user)
+):
     """
     Logout user.
 
-    Invalidates the current session.
-    Note: In a stateless JWT system, logout is handled client-side
-    by removing the tokens. This endpoint is for server-side logging.
+    Invalidates the current access token by adding it to the blacklist.
+    Client should also remove tokens from storage.
     """
+    from app.core.security import blacklist_token
+
+    # Add token to blacklist
+    blacklist_token(token)
+
     return {"message": "Successfully logged out"}

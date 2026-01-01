@@ -53,18 +53,29 @@ async def get_or_create_user(
     user_info: OAuthUserInfo
 ) -> User:
     """Get existing user or create new one from OAuth info."""
+    from app.models.user import AuthProvider
+    import uuid
+
+    # Map provider string to AuthProvider enum
+    provider_map = {
+        "kakao": AuthProvider.KAKAO,
+        "naver": AuthProvider.NAVER,
+        "google": AuthProvider.GOOGLE,
+    }
+    auth_provider = provider_map.get(user_info.provider, AuthProvider.EMAIL)
+
     # Check for existing user by provider ID
     result = await db.execute(
         select(User).where(
-            User.oauth_provider == user_info.provider,
-            User.oauth_provider_id == user_info.provider_id
+            User.auth_provider == auth_provider,
+            User.provider_id == user_info.provider_id
         )
     )
     user = result.scalar_one_or_none()
 
     if user:
         # Update last login
-        user.last_login = datetime.utcnow()
+        user.last_login_at = datetime.utcnow()
         await db.commit()
         return user
 
@@ -77,22 +88,22 @@ async def get_or_create_user(
 
         if user:
             # Link OAuth provider to existing user
-            user.oauth_provider = user_info.provider
-            user.oauth_provider_id = user_info.provider_id
-            user.last_login = datetime.utcnow()
+            user.auth_provider = auth_provider
+            user.provider_id = user_info.provider_id
+            user.last_login_at = datetime.utcnow()
             await db.commit()
             return user
 
     # Create new user
     user = User(
+        id=str(uuid.uuid4()),
         email=user_info.email or f"{user_info.provider}_{user_info.provider_id}@oauth.local",
         name=user_info.name or "User",
-        oauth_provider=user_info.provider,
-        oauth_provider_id=user_info.provider_id,
-        profile_image=user_info.profile_image,
+        auth_provider=auth_provider,
+        provider_id=user_info.provider_id,
         phone=user_info.phone,
         is_verified=True,  # OAuth users are verified
-        password_hash=""  # No password for OAuth users
+        hashed_password=None  # No password for OAuth users
     )
 
     db.add(user)

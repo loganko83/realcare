@@ -64,9 +64,18 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Try to get user ID from auth header
         auth_header = request.headers.get("Authorization", "")
         if auth_header.startswith("Bearer "):
-            # Use token hash as identifier
             token = auth_header[7:]
-            return f"auth:{hash(token)}"
+            # Extract user ID from JWT for proper tracking
+            try:
+                from app.core.security import verify_token
+                user_id = verify_token(token, token_type="access")
+                if user_id:
+                    return f"user:{user_id}"
+            except Exception:
+                pass
+            # Fallback: Use token signature (last 16 chars) as identifier
+            # More stable than hash() which can vary across sessions
+            return f"token:{token[-16:]}" if len(token) > 16 else f"token:{token}"
 
         # Fall back to IP address
         forwarded = request.headers.get("X-Forwarded-For")

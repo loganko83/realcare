@@ -1,15 +1,21 @@
 name: CD - Continuous Deployment
 
 on:
-  push:
+  # Trigger after CI workflow completes successfully
+  workflow_run:
+    workflows: ["CI - Continuous Integration"]
+    types:
+      - completed
     branches: [ master ]
+  # Allow manual deployment
   workflow_dispatch:
 
 jobs:
   deploy:
     name: Deploy to Production Server
     runs-on: ubuntu-latest
-    needs: []
+    # Only deploy if CI passed (or manual trigger)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code

@@ -56,3 +56,8 @@ class TokenPayload(BaseModel):
     sub: str
     exp: datetime
     type: str
+
+
+class RefreshTokenRequest(BaseModel):
+    """Refresh token request schema - uses POST body for security."""
+    refresh_token: str = Field(..., description="Refresh token from login response")
