@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react';
+import { Button, Card, FormInput } from '../common';
 
 interface MapSelectorProps {
   onSelectLocation: (location: {
@@ -226,13 +227,14 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
               </button>
             )}
           </div>
-          <button
+          <Button
+            variant="secondary"
             onClick={handleGetCurrentLocation}
-            className="px-3 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition"
             title="Use current location"
+            className="px-3"
           >
-            <Navigation size={18} className="text-slate-600" />
-          </button>
+            <Navigation size={18} />
+          </Button>
         </div>
 
         {/* Search Results Dropdown */}
@@ -283,7 +285,7 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
 
       {/* Selected Address */}
       {selectedAddress && (
-        <div className="bg-brand-50 p-4 rounded-xl border border-brand-100">
+        <Card variant="flat" className="bg-brand-50 border-brand-100">
           <div className="flex items-start gap-3">
             <MapPin className="text-brand-600 mt-0.5" size={18} />
             <div className="flex-1">
@@ -293,27 +295,25 @@ export function MapSelector({ onSelectLocation, initialAddress, onClose }: MapSe
               </p>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Action Buttons */}
       <div className="flex gap-3">
         {onClose && (
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition"
-          >
+          <Button variant="outline" fullWidth onClick={onClose}>
             Cancel
-          </button>
+          </Button>
         )}
-        <button
+        <Button
+          variant="primary"
+          fullWidth
           onClick={handleConfirm}
           disabled={!marker || !selectedAddress}
-          className="flex-1 bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          icon={<MapPin size={18} />}
         >
-          <MapPin size={18} />
           Confirm Location
-        </button>
+        </Button>
       </div>
     </div>
   );

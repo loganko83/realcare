@@ -5,7 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import {
-  X,
   ChevronRight,
   ChevronLeft,
   Target,
@@ -16,6 +15,7 @@ import {
   Shield,
   CheckCircle,
 } from 'lucide-react';
+import { Button, Badge, Card } from '../common';
 
 interface OnboardingStep {
   id: string;
@@ -150,12 +150,9 @@ export function OnboardingTutorial({ onComplete, onSkip }: OnboardingTutorialPro
               </button>
             ))}
           </div>
-          <button
-            onClick={handleSkip}
-            className="text-sm text-slate-600 hover:text-slate-800 transition font-medium"
-          >
+          <Button variant="ghost" size="sm" onClick={handleSkip}>
             Skip
-          </button>
+          </Button>
         </div>
 
         {/* Content */}
@@ -170,9 +167,9 @@ export function OnboardingTutorial({ onComplete, onSkip }: OnboardingTutorialPro
             <h2 className="text-2xl font-bold text-slate-800">{step.title}</h2>
             <p className="text-slate-500 leading-relaxed">{step.description}</p>
             {step.highlight && (
-              <span className="inline-block px-3 py-1 bg-brand-100 text-brand-700 text-sm font-medium rounded-full">
+              <Badge variant="info" className="inline-block">
                 {step.highlight}
-              </span>
+              </Badge>
             )}
           </div>
         </div>
@@ -180,7 +177,7 @@ export function OnboardingTutorial({ onComplete, onSkip }: OnboardingTutorialPro
         {/* Feature Quick Preview - Shows on feature steps */}
         {currentStep > 0 && (
           <div className="px-6 pb-4">
-            <div className="bg-gray-50 rounded-xl p-4">
+            <Card variant="flat" padding="sm" className="bg-gray-50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center">
                   {step.icon}
@@ -191,37 +188,30 @@ export function OnboardingTutorial({ onComplete, onSkip }: OnboardingTutorialPro
                 </div>
                 <ChevronRight size={16} className="text-slate-300" />
               </div>
-            </div>
+            </Card>
           </div>
         )}
 
         {/* Navigation */}
         <div className="p-6 pt-2 flex gap-3">
           {!isFirstStep && (
-            <button
-              onClick={handlePrev}
-              className="flex items-center justify-center gap-1 px-4 py-3 rounded-xl border border-gray-200 text-slate-600 font-medium hover:bg-gray-50 transition"
-            >
-              <ChevronLeft size={18} />
+            <Button variant="outline" onClick={handlePrev} icon={<ChevronLeft size={18} />}>
               Back
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="primary"
+            fullWidth
             onClick={handleNext}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand-700 text-white font-bold rounded-xl hover:bg-brand-800 transition"
+            icon={isLastStep ? <CheckCircle size={18} /> : undefined}
           >
-            {isLastStep ? (
-              <>
-                <CheckCircle size={18} />
-                Get Started
-              </>
-            ) : (
-              <>
+            {isLastStep ? 'Get Started' : (
+              <span className="flex items-center gap-2">
                 Next
                 <ChevronRight size={18} />
-              </>
+              </span>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

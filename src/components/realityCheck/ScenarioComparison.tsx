@@ -8,14 +8,12 @@ import {
   TrendingUp,
   TrendingDown,
   Calendar,
-  Percent,
-  ArrowRight,
   RotateCcw,
   Share2,
 } from 'lucide-react';
-import { calculateRealityScore, type RealityScoreResult, type RealityScoreInput } from '../../lib/utils/realityScore';
+import { calculateRealityScore, type RealityScoreInput } from '../../lib/utils/realityScore';
 import { formatKRW } from '../../lib/utils/dsr';
-import type { RegionRegulation } from '../../lib/constants/regulations';
+import { Card, Button, SelectButton, Badge } from '../common';
 
 interface ScenarioComparisonProps {
   baseInput: {
@@ -143,47 +141,37 @@ export function ScenarioComparison({ baseInput, onShare }: ScenarioComparisonPro
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-slate-800">Scenario Comparison</h2>
         {onShare && (
-          <button
-            onClick={onShare}
-            className="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700"
-          >
-            <Share2 size={16} />
+          <Button variant="ghost" size="sm" onClick={onShare} icon={<Share2 size={16} />}>
             Share
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Scenario Settings */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
+      <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium text-slate-700 flex items-center gap-2">
             <Calendar size={18} />
             Wait Period
           </h3>
-          <div className="flex gap-2">
-            {[1, 2, 3, 5].map((year) => (
-              <button
-                key={year}
-                onClick={() => setSettings({ ...settings, waitYears: year })}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition ${
-                  settings.waitYears === year
-                    ? 'bg-brand-600 text-white'
-                    : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                }`}
-              >
-                {year}Y
-              </button>
-            ))}
-          </div>
+          <SelectButton
+            options={[
+              { id: '1', label: '1Y' },
+              { id: '2', label: '2Y' },
+              { id: '3', label: '3Y' },
+              { id: '5', label: '5Y' },
+            ]}
+            value={String(settings.waitYears)}
+            onChange={(val) => setSettings({ ...settings, waitYears: Number(val) })}
+            size="sm"
+            columns={4}
+          />
         </div>
 
         {/* Advanced Settings Toggle */}
-        <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm text-brand-600 hover:underline"
-        >
+        <Button variant="ghost" size="sm" onClick={() => setShowAdvanced(!showAdvanced)}>
           {showAdvanced ? 'Hide' : 'Show'} advanced settings
-        </button>
+        </Button>
 
         {showAdvanced && (
           <div className="mt-4 space-y-4 pt-4 border-t border-gray-100">
@@ -257,7 +245,9 @@ export function ScenarioComparison({ baseInput, onShare }: ScenarioComparisonPro
               />
             </div>
 
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSettings({
                 waitYears: 1,
                 priceAppreciation: 3,
@@ -265,27 +255,26 @@ export function ScenarioComparison({ baseInput, onShare }: ScenarioComparisonPro
                 savingsRate: 20,
                 interestRateChange: 0,
               })}
-              className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
+              icon={<RotateCcw size={14} />}
             >
-              <RotateCcw size={14} />
               Reset to defaults
-            </button>
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Comparison Cards */}
       <div className="grid grid-cols-2 gap-3">
         {/* Buy Now */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
+        <Card padding="sm">
           <div className="text-center mb-4">
             <p className="text-sm text-slate-500 mb-1">Buy Now</p>
             <p className={`text-3xl font-bold ${getScoreColor(scenarios.now.result.score)}`}>
               {scenarios.now.result.score}
             </p>
-            <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${getGradeBg(scenarios.now.result.grade)}`}>
+            <Badge variant={scenarios.now.result.grade === 'A' ? 'success' : scenarios.now.result.grade === 'B' ? 'success' : scenarios.now.result.grade === 'C' ? 'warning' : 'error'} size="sm">
               {scenarios.now.result.grade}
-            </span>
+            </Badge>
           </div>
 
           <div className="space-y-2 text-xs">
@@ -312,21 +301,21 @@ export function ScenarioComparison({ baseInput, onShare }: ScenarioComparisonPro
               <span className="font-medium">{scenarios.now.result.analysis.dsrPercentage.toFixed(1)}%</span>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Buy Later */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 relative">
-          <div className="absolute -top-2 -right-2 bg-brand-600 text-white text-xs px-2 py-1 rounded-full">
+        <Card padding="sm" className="relative">
+          <Badge variant="info" size="sm" className="absolute -top-2 -right-2">
             +{settings.waitYears}Y
-          </div>
+          </Badge>
           <div className="text-center mb-4">
             <p className="text-sm text-slate-500 mb-1">Buy in {settings.waitYears} Year{settings.waitYears > 1 ? 's' : ''}</p>
             <p className={`text-3xl font-bold ${getScoreColor(scenarios.later.result.score)}`}>
               {scenarios.later.result.score}
             </p>
-            <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${getGradeBg(scenarios.later.result.grade)}`}>
+            <Badge variant={scenarios.later.result.grade === 'A' ? 'success' : scenarios.later.result.grade === 'B' ? 'success' : scenarios.later.result.grade === 'C' ? 'warning' : 'error'} size="sm">
               {scenarios.later.result.grade}
-            </span>
+            </Badge>
           </div>
 
           <div className="space-y-2 text-xs">
@@ -359,15 +348,15 @@ export function ScenarioComparison({ baseInput, onShare }: ScenarioComparisonPro
               <span className="font-medium">{scenarios.later.result.analysis.dsrPercentage.toFixed(1)}%</span>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Score Comparison */}
-      <div className={`p-4 rounded-2xl ${
-        recommendation === 'wait' ? 'bg-green-50 border border-green-200' :
-        recommendation === 'now' ? 'bg-blue-50 border border-blue-200' :
-        'bg-gray-50 border border-gray-200'
-      }`}>
+      <Card variant="flat" className={
+        recommendation === 'wait' ? 'bg-green-50 border-green-200' :
+        recommendation === 'now' ? 'bg-blue-50 border-blue-200' :
+        'bg-gray-50 border-gray-200'
+      }>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold text-slate-800">Analysis</h3>
           <div className={`flex items-center gap-1 text-sm font-medium ${
@@ -416,7 +405,7 @@ export function ScenarioComparison({ baseInput, onShare }: ScenarioComparisonPro
             </p>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Disclaimer */}
       <p className="text-xs text-slate-400 text-center">

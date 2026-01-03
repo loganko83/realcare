@@ -8,7 +8,6 @@ import {
   Calculator,
   MapPin,
   Home,
-  Wallet,
   TrendingUp,
   AlertTriangle,
   CheckCircle,
@@ -25,6 +24,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '
 import { ScenarioComparison } from './ScenarioComparison';
 import { ShareButton } from './ShareButton';
 import { parseShareFromUrl, type ShareableState } from '../../lib/utils/shareUtils';
+import { Button, Card, ProgressBar, SectionHeader, FormSelect, Badge, SelectButton } from '../common';
 
 interface RealityCheckFormProps {
   onComplete?: (result: ReturnType<typeof useRealityCheck>['data']) => void;
@@ -242,13 +242,9 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
     if (showComparison) {
       return (
         <div className="space-y-4 animate-fade-in">
-          <button
-            onClick={() => setShowComparison(false)}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800"
-          >
-            <ArrowLeft size={16} />
+          <Button variant="ghost" size="sm" onClick={() => setShowComparison(false)} icon={<ArrowLeft size={16} />}>
             Back to Results
-          </button>
+          </Button>
           <ScenarioComparison
             baseInput={{
               region,
@@ -273,7 +269,7 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
     return (
       <div className="space-y-6 animate-fade-in">
         {/* Score Display */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+        <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg text-slate-800">Reality Check Result</h2>
             <div className="flex items-center gap-2">
@@ -326,10 +322,10 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
               <p className="text-lg font-bold text-slate-800">{scoreResult.breakdown.stabilityScore}/25</p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Financial Summary */}
-        <div className="bg-slate-800 text-white p-6 rounded-2xl">
+        <Card className="bg-slate-800 text-white">
           <h3 className="font-bold mb-4">Financial Analysis</h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
@@ -369,7 +365,7 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
               </span>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Risks */}
         {scoreResult.risks.length > 0 && (
@@ -400,7 +396,7 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
         )}
 
         {/* Region Info */}
-        <div className="bg-brand-50 p-4 rounded-xl border border-brand-100">
+        <Card variant="flat" className="bg-brand-50 border-brand-100">
           <h3 className="font-bold text-brand-800 mb-2 flex items-center gap-2">
             <MapPin size={18} /> Region: {selectedRegion?.name}
           </h3>
@@ -415,33 +411,27 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
               <p>Non-Regulated Zone - LTV limit: {scoreResult.analysis.applicableLTV}%</p>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Action Buttons */}
         <div className="space-y-3">
           <div className="flex gap-3">
-            <button
-              onClick={() => setShowResult(false)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition"
-            >
+            <Button variant="outline" fullWidth onClick={() => setShowResult(false)}>
               Calculate Again
-            </button>
-            <button
-              onClick={() => setShowComparison(true)}
-              className="flex-1 py-3 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 transition flex items-center justify-center gap-2"
-            >
-              <GitCompare size={18} />
+            </Button>
+            <Button variant="primary" fullWidth onClick={() => setShowComparison(true)} icon={<GitCompare size={18} />}>
               Compare Scenarios
-            </button>
+            </Button>
           </div>
-          <button
+          <Button
+            variant="outline"
+            fullWidth
             onClick={handleDownloadPdf}
             disabled={downloadingPdf}
-            className="w-full py-3 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition flex items-center justify-center gap-2 disabled:opacity-50"
+            icon={downloadingPdf ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
           >
-            {downloadingPdf ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
             {downloadingPdf ? 'Generating PDF...' : 'Download Report (PDF)'}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -450,56 +440,36 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
   return (
     <div className="space-y-6">
       {/* Step indicator */}
-      <div className="flex gap-2 mb-6">
-        {[1, 2, 3].map((s) => (
-          <div
-            key={s}
-            className={`flex-1 h-1.5 rounded-full transition ${
-              s <= step ? 'bg-brand-600' : 'bg-gray-200'
-            }`}
-          />
-        ))}
-      </div>
+      <ProgressBar current={step} total={3} className="mb-6" />
 
       {step === 1 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-semibold text-lg mb-4 text-slate-800 flex items-center gap-2">
-              <MapPin size={20} className="text-brand-600" />
-              Target Location
-            </h2>
+          <Card>
+            <SectionHeader icon={MapPin} title="Target Location" className="mb-4" />
 
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">Select Region</label>
-                <select
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                >
-                  <optgroup label="Seoul">
-                    {SEOUL_DISTRICTS.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Gyeonggi">
-                    {GYEONGGI_CITIES.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </optgroup>
-                </select>
-              </div>
+              <FormSelect
+                label="Select Region"
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                options={[
+                  { label: 'Seoul', options: SEOUL_DISTRICTS.map(d => ({ value: d.id, label: d.name })) },
+                  { label: 'Gyeonggi', options: GYEONGGI_CITIES.map(c => ({ value: c.id, label: c.name })) },
+                ]}
+              />
 
               {selectedRegion && (
-                <div className={`p-3 rounded-lg text-sm ${
-                  selectedRegion.isSpeculativeZone ? 'bg-red-50 text-red-700' :
-                  selectedRegion.isAdjustedZone ? 'bg-orange-50 text-orange-700' :
-                  'bg-green-50 text-green-700'
-                }`}>
+                <Badge
+                  variant={
+                    selectedRegion.isSpeculativeZone ? 'error' :
+                    selectedRegion.isAdjustedZone ? 'warning' : 'success'
+                  }
+                  className="w-full justify-center py-2"
+                >
                   {selectedRegion.isSpeculativeZone && 'Speculative Overheated Zone (Strict regulation)'}
                   {selectedRegion.isAdjustedZone && !selectedRegion.isSpeculativeZone && 'Adjusted Zone (Moderate regulation)'}
                   {!selectedRegion.isSpeculativeZone && !selectedRegion.isAdjustedZone && 'Non-Regulated Zone (Relaxed)'}
-                </div>
+                </Badge>
               )}
 
               <div>
@@ -518,24 +488,18 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
                 />
               </div>
             </div>
-          </div>
+          </Card>
 
-          <button
-            onClick={() => setStep(2)}
-            className="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-900 transition"
-          >
+          <Button variant="dark" size="lg" fullWidth onClick={() => setStep(2)}>
             Next: Income Info
-          </button>
+          </Button>
         </div>
       )}
 
       {step === 2 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-semibold text-lg mb-4 text-slate-800 flex items-center gap-2">
-              <TrendingUp size={20} className="text-brand-600" />
-              Income & Debt
-            </h2>
+          <Card>
+            <SectionHeader icon={TrendingUp} title="Income & Debt" className="mb-4" />
 
             <div className="space-y-6">
               <div>
@@ -586,54 +550,43 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
                 />
               </div>
             </div>
-          </div>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(1)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition"
-            >
+            <Button variant="outline" fullWidth onClick={() => setStep(1)}>
               Back
-            </button>
-            <button
-              onClick={() => setStep(3)}
-              className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-slate-900 transition"
-            >
+            </Button>
+            <Button variant="dark" fullWidth onClick={() => setStep(3)}>
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {step === 3 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-semibold text-lg mb-4 text-slate-800 flex items-center gap-2">
-              <Home size={20} className="text-brand-600" />
-              Ownership Status
-            </h2>
+          <Card>
+            <SectionHeader icon={Home} title="Ownership Status" className="mb-4" />
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Current Home Ownership</label>
-                <div className="flex gap-2">
-                  {[0, 1, 2, 3].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => {
-                        setHouseCount(n);
-                        setIsFirstHome(n === 0);
-                      }}
-                      className={`flex-1 py-3 rounded-lg border text-sm font-bold transition ${
-                        houseCount === n
-                          ? 'border-brand-500 bg-brand-50 text-brand-700'
-                          : 'border-gray-200 text-slate-500 hover:bg-gray-50'
-                      }`}
-                    >
-                      {n === 0 ? 'None' : n === 3 ? '3+' : `${n}`}
-                    </button>
-                  ))}
-                </div>
+                <SelectButton
+                  options={[
+                    { id: '0', label: 'None' },
+                    { id: '1', label: '1' },
+                    { id: '2', label: '2' },
+                    { id: '3', label: '3+' },
+                  ]}
+                  value={String(houseCount)}
+                  onChange={(val) => {
+                    const n = Number(val);
+                    setHouseCount(n);
+                    setIsFirstHome(n === 0);
+                  }}
+                  variant="toggle"
+                  columns={4}
+                />
               </div>
 
               <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
@@ -649,10 +602,10 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
                 </label>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Summary before calculation */}
-          <div className="bg-gray-50 p-4 rounded-xl">
+          <Card variant="flat" className="bg-gray-50">
             <h3 className="font-medium text-slate-700 mb-3">Summary</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -672,23 +625,21 @@ export function RealityCheckForm({ onComplete }: RealityCheckFormProps) {
                 <span className="font-medium text-slate-800">{formatKRW(cashAvailable * 1000000)}</span>
               </div>
             </div>
-          </div>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(2)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition"
-            >
+            <Button variant="outline" fullWidth onClick={() => setStep(2)}>
               Back
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="dark"
+              fullWidth
               onClick={handleCalculate}
               disabled={loading}
-              className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-slate-900 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              icon={loading ? <Loader2 className="animate-spin" size={20} /> : <Calculator size={20} />}
             >
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <Calculator size={20} />}
               {loading ? 'Calculating...' : 'Check Reality Score'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

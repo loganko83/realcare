@@ -30,6 +30,7 @@ import {
   getCriticalTasks,
 } from '../../lib/utils/timelineGenerator';
 import { TimelineCategorySection } from './TimelineCategorySection';
+import { Card, Badge, Button, ProgressBar, SelectButton } from '../common';
 
 // Dynamic icon component based on category
 function CategoryIcon({ category, size = 18 }: { category: string; size?: number }) {
@@ -180,11 +181,11 @@ export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'critical':
-        return <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">Critical</span>;
+        return <Badge variant="error" size="sm">Critical</Badge>;
       case 'high':
-        return <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">High</span>;
+        return <Badge variant="warning" size="sm">High</Badge>;
       case 'medium':
-        return <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full">Medium</span>;
+        return <Badge variant="info" size="sm">Medium</Badge>;
       default:
         return null;
     }
@@ -200,7 +201,7 @@ export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
   return (
     <div className="space-y-6">
       {/* Progress Summary */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+      <Card>
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-lg text-slate-800">Move-in Progress</h2>
           <span className="text-2xl font-bold text-brand-600">{progress.percentage}%</span>
@@ -235,55 +236,45 @@ export function TimelineView({ contract, onRefresh }: TimelineViewProps) {
             )}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Filter and View Toggle */}
       <div className="flex gap-3">
         {/* Filter Tabs */}
-        <div className="flex-1 flex gap-2 bg-gray-100 p-1 rounded-xl">
-          {[
-            { id: 'all', label: 'All' },
-            { id: 'pending', label: 'Pending' },
-            { id: 'completed', label: 'Done' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilter(tab.id as typeof filter)}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${
-                filter === tab.id
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex-1">
+          <SelectButton
+            options={[
+              { id: 'all', label: 'All' },
+              { id: 'pending', label: 'Pending' },
+              { id: 'completed', label: 'Done' },
+            ]}
+            value={filter}
+            onChange={(val) => setFilter(val as typeof filter)}
+            variant="toggle"
+            size="sm"
+          />
         </div>
 
         {/* View Mode Toggle */}
         <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
-          <button
+          <Button
+            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+            size="sm"
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition ${
-              viewMode === 'list'
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
+            className="p-2"
             title="List view"
           >
             <List size={18} />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={viewMode === 'category' ? 'secondary' : 'ghost'}
+            size="sm"
             onClick={() => setViewMode('category')}
-            className={`p-2 rounded-lg transition ${
-              viewMode === 'category'
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
+            className="p-2"
             title="Category view"
           >
             <LayoutGrid size={18} />
-          </button>
+          </Button>
         </div>
       </div>
 
