@@ -5,12 +5,8 @@
 
 import { useState } from 'react';
 import {
-  Search,
-  Filter,
   MapPin,
   Home,
-  TrendingUp,
-  Clock,
   ChevronRight,
   Eye,
   MessageSquare,
@@ -19,10 +15,35 @@ import {
 import { usePublicSignals } from '../../services/ownerSignal';
 import type { SignalFilters, OwnerSignal } from '../../types/ownerSignal';
 import { formatKRW } from '../../lib/utils/dsr';
+import {
+  Badge,
+  Card,
+  SearchFilterBar,
+  SelectButton,
+} from '../common';
 
 interface SignalListProps {
   onSelectSignal?: (signal: OwnerSignal) => void;
 }
+
+const SIGNAL_TYPE_OPTIONS = [
+  { id: 'sale', label: 'For Sale' },
+  { id: 'jeonse', label: 'Jeonse' },
+  { id: 'monthly', label: 'Monthly Rent' },
+];
+
+const PROPERTY_TYPE_OPTIONS = [
+  { id: 'apartment', label: 'Apartment' },
+  { id: 'villa', label: 'Villa' },
+  { id: 'officetel', label: 'Officetel' },
+  { id: 'house', label: 'House' },
+];
+
+const URGENCY_OPTIONS = [
+  { id: 'urgent', label: 'Urgent' },
+  { id: 'flexible', label: 'Flexible' },
+  { id: 'exploring', label: 'Exploring' },
+];
 
 export function SignalList({ onSelectSignal }: SignalListProps) {
   const [showFilters, setShowFilters] = useState(false);
@@ -37,24 +58,19 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
     signal.property.propertyType.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getUrgencyBadge = (urgency: string) => {
+  const activeFilterCount = Object.keys(filters).filter(k => filters[k as keyof SignalFilters]).length;
+
+  const getUrgencyVariant = (urgency: string): 'urgent' | 'flexible' | 'exploring' => {
     switch (urgency) {
-      case 'urgent':
-        return <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full">Urgent</span>;
-      case 'flexible':
-        return <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">Flexible</span>;
-      default:
-        return <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-full">Exploring</span>;
+      case 'urgent': return 'urgent';
+      case 'flexible': return 'flexible';
+      default: return 'exploring';
     }
   };
 
   const getSignalTypeLabel = (type: string) => {
-    switch (type) {
-      case 'sale': return 'For Sale';
-      case 'jeonse': return 'Jeonse';
-      case 'monthly': return 'Monthly Rent';
-      default: return type;
-    }
+    const option = SIGNAL_TYPE_OPTIONS.find(o => o.id === type);
+    return option?.label || type;
   };
 
   const getPropertyTypeIcon = (type: string) => {
@@ -70,30 +86,18 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search by district or type..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-          />
-        </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`p-3 rounded-xl border transition ${
-            showFilters ? 'bg-brand-50 border-brand-500 text-brand-600' : 'border-gray-200 text-slate-600 hover:bg-gray-50'
-          }`}
-        >
-          <Filter size={20} />
-        </button>
-      </div>
+      <SearchFilterBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onFilterToggle={() => setShowFilters(!showFilters)}
+        isFilterOpen={showFilters}
+        filterCount={activeFilterCount}
+        placeholder="Search by district or type..."
+      />
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-white p-4 rounded-xl border border-gray-200 space-y-4 animate-fade-in">
+        <Card variant="outlined" padding="md" className="space-y-4 animate-fade-in">
           <div className="flex justify-between items-center">
             <h3 className="font-bold text-slate-800">Filters</h3>
             <button
@@ -106,43 +110,34 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
 
           <div>
             <label className="text-xs font-bold text-slate-500 mb-2 block">Transaction Type</label>
-            <div className="flex gap-2">
-              {['sale', 'jeonse', 'monthly'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilters(f => ({
-                    ...f,
-                    signalType: f.signalType === type ? undefined : type as 'sale' | 'jeonse' | 'monthly'
-                  }))}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
-                    filters.signalType === type
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {getSignalTypeLabel(type)}
-                </button>
-              ))}
-            </div>
+            <SelectButton
+              options={SIGNAL_TYPE_OPTIONS}
+              value={filters.signalType || ''}
+              onChange={(id) => setFilters(f => ({
+                ...f,
+                signalType: f.signalType === id ? undefined : id as 'sale' | 'jeonse' | 'monthly'
+              }))}
+              variant="toggle"
+            />
           </div>
 
           <div>
             <label className="text-xs font-bold text-slate-500 mb-2 block">Property Type</label>
             <div className="flex gap-2 flex-wrap">
-              {['apartment', 'villa', 'officetel', 'house'].map((type) => (
+              {PROPERTY_TYPE_OPTIONS.map((type) => (
                 <button
-                  key={type}
+                  key={type.id}
                   onClick={() => setFilters(f => ({
                     ...f,
-                    propertyType: f.propertyType === type ? undefined : type as 'apartment' | 'villa' | 'officetel' | 'house'
+                    propertyType: f.propertyType === type.id ? undefined : type.id as 'apartment' | 'villa' | 'officetel' | 'house'
                   }))}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                    filters.propertyType === type
+                    filters.propertyType === type.id
                       ? 'bg-brand-600 text-white'
                       : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
                   }`}
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {type.label}
                 </button>
               ))}
             </div>
@@ -150,26 +145,17 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
 
           <div>
             <label className="text-xs font-bold text-slate-500 mb-2 block">Urgency</label>
-            <div className="flex gap-2">
-              {['urgent', 'flexible', 'exploring'].map((urgency) => (
-                <button
-                  key={urgency}
-                  onClick={() => setFilters(f => ({
-                    ...f,
-                    urgency: f.urgency === urgency ? undefined : urgency as 'urgent' | 'flexible' | 'exploring'
-                  }))}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${
-                    filters.urgency === urgency
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {urgency.charAt(0).toUpperCase() + urgency.slice(1)}
-                </button>
-              ))}
-            </div>
+            <SelectButton
+              options={URGENCY_OPTIONS}
+              value={filters.urgency || ''}
+              onChange={(id) => setFilters(f => ({
+                ...f,
+                urgency: f.urgency === id ? undefined : id as 'urgent' | 'flexible' | 'exploring'
+              }))}
+              variant="toggle"
+            />
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Results Count */}
@@ -177,7 +163,7 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
         <span className="text-slate-500">
           {filteredSignals?.length || 0} signals found
         </span>
-        {Object.keys(filters).filter(k => filters[k as keyof SignalFilters]).length > 0 && (
+        {activeFilterCount > 0 && (
           <button
             onClick={() => setFilters({})}
             className="text-brand-600 hover:underline flex items-center gap-1"
@@ -196,17 +182,17 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
       )}
 
       {error && (
-        <div className="bg-red-50 p-4 rounded-xl text-center">
+        <Card variant="flat" className="bg-red-50 text-center">
           <p className="text-red-600">Failed to load signals</p>
-        </div>
+        </Card>
       )}
 
       {filteredSignals?.length === 0 && !isLoading && (
-        <div className="bg-gray-50 p-8 rounded-xl text-center">
+        <Card variant="flat" padding="lg" className="text-center">
           <Home size={40} className="mx-auto text-gray-300 mb-3" />
           <p className="text-slate-600 font-medium">No signals found</p>
           <p className="text-sm text-slate-400 mt-1">Try adjusting your filters</p>
-        </div>
+        </Card>
       )}
 
       <div className="space-y-3">
@@ -218,14 +204,16 @@ export function SignalList({ onSelectSignal }: SignalListProps) {
           >
             <div className="flex justify-between items-start mb-3">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded">
+                <Badge variant="default" className="bg-slate-800 text-white">
                   {getPropertyTypeIcon(signal.property.propertyType)}
-                </span>
-                <span className="px-2 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded">
+                </Badge>
+                <Badge variant="info" className="bg-brand-100 text-brand-700">
                   {getSignalTypeLabel(signal.signalType)}
-                </span>
+                </Badge>
               </div>
-              {getUrgencyBadge(signal.preferences.urgency)}
+              <Badge variant={getUrgencyVariant(signal.preferences.urgency)}>
+                {signal.preferences.urgency.charAt(0).toUpperCase() + signal.preferences.urgency.slice(1)}
+              </Badge>
             </div>
 
             <div className="mb-3">

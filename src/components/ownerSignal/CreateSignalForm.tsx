@@ -6,13 +6,11 @@
 import { useState } from 'react';
 import {
   Home,
-  MapPin,
   DollarSign,
   Clock,
   Users,
   Check,
   ChevronLeft,
-  Loader2,
   Map as MapIcon,
 } from 'lucide-react';
 import { useCreateSignal } from '../../services/ownerSignal';
@@ -20,15 +18,57 @@ import { SEOUL_DISTRICTS, GYEONGGI_CITIES } from '../../lib/constants/regulation
 import { formatKRW } from '../../lib/utils/dsr';
 import type { CreateSignalInput } from '../../types/ownerSignal';
 import { MapSelectorInline } from './MapSelector';
+import {
+  Button,
+  Card,
+  FormInput,
+  FormSelect,
+  SelectButton,
+  SectionHeader,
+  ProgressBar,
+  useMultiStepForm,
+} from '../common';
 
 interface CreateSignalFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
+const PROPERTY_TYPES = [
+  { id: 'apartment', label: 'Apartment' },
+  { id: 'villa', label: 'Villa' },
+  { id: 'officetel', label: 'Officetel' },
+  { id: 'house', label: 'House' },
+] as const;
+
+const SIGNAL_TYPES = [
+  { id: 'sale', label: 'Sale' },
+  { id: 'jeonse', label: 'Jeonse' },
+  { id: 'monthly', label: 'Monthly' },
+] as const;
+
+const URGENCY_OPTIONS = [
+  { id: 'urgent', label: 'Urgent', description: 'Within 1 month' },
+  { id: 'flexible', label: 'Flexible', description: 'Within 3 months' },
+  { id: 'exploring', label: 'Exploring', description: 'No rush, testing market' },
+] as const;
+
+const BUYER_TYPES = [
+  { id: 'individual', label: 'Individual' },
+  { id: 'corporate', label: 'Corporate' },
+  { id: 'agent', label: 'Agent' },
+] as const;
+
+const VISIBILITY_OPTIONS = [
+  { id: 'public', label: 'Public', description: 'Visible to all verified users' },
+  { id: 'verified_only', label: 'Verified Only', description: 'Only users with high Reality Score' },
+  { id: 'agents_only', label: 'Agents Only', description: 'Only licensed real estate agents' },
+] as const;
+
 export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps) {
-  const [step, setStep] = useState(1);
-  const totalSteps = 4;
+  const { step, totalSteps, isFirstStep, prevStep, goToStep } = useMultiStepForm({
+    totalSteps: 4,
+  });
 
   // Form state
   const [propertyType, setPropertyType] = useState<'apartment' | 'villa' | 'officetel' | 'house'>('apartment');
@@ -41,7 +81,7 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
   const [mapLocation, setMapLocation] = useState<{ address: string; district: string; lat: number; lng: number } | null>(null);
 
   const [signalType, setSignalType] = useState<'sale' | 'jeonse' | 'monthly'>('sale');
-  const [minPrice, setMinPrice] = useState(800); // in millions
+  const [minPrice, setMinPrice] = useState(800);
   const [maxPrice, setMaxPrice] = useState(850);
   const [monthlyRent, setMonthlyRent] = useState(100);
   const [isNegotiable, setIsNegotiable] = useState(true);
@@ -94,78 +134,43 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
     );
   };
 
+  const regionGroups = [
+    { label: 'Seoul', options: SEOUL_DISTRICTS.map(d => ({ value: d.id, label: d.name })) },
+    { label: 'Gyeonggi', options: GYEONGGI_CITIES.map(c => ({ value: c.id, label: c.name })) },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Progress Bar */}
-      <div className="flex gap-2">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`flex-1 h-1.5 rounded-full transition ${
-              i < step ? 'bg-brand-600' : 'bg-gray-200'
-            }`}
-          />
-        ))}
-      </div>
+      <ProgressBar current={step} total={totalSteps} />
 
       {/* Step 1: Property Info */}
       {step === 1 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <Home size={20} className="text-brand-600" />
-              Property Information
-            </h2>
+          <Card>
+            <SectionHeader icon={Home} title="Property Information" />
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Property Type</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'apartment', label: 'Apartment' },
-                    { id: 'villa', label: 'Villa' },
-                    { id: 'officetel', label: 'Officetel' },
-                    { id: 'house', label: 'House' },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setPropertyType(type.id as typeof propertyType)}
-                      className={`py-3 rounded-xl text-sm font-bold transition ${
-                        propertyType === type.id
-                          ? 'bg-brand-600 text-white'
-                          : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
+                <SelectButton
+                  options={PROPERTY_TYPES.map(t => ({ id: t.id, label: t.label }))}
+                  value={propertyType}
+                  onChange={(id) => setPropertyType(id as typeof propertyType)}
+                  variant="pill"
+                  columns={2}
+                />
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">Location</label>
-                <select
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
-                >
-                  <optgroup label="Seoul">
-                    {SEOUL_DISTRICTS.map((d) => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Gyeonggi">
-                    {GYEONGGI_CITIES.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </optgroup>
-                </select>
-              </div>
+              <FormSelect
+                label="Location"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                groups={regionGroups}
+              />
 
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Full Address</label>
 
-                {/* Toggle between text input and map */}
                 <div className="flex gap-2 mb-3">
                   <button
                     type="button"
@@ -193,108 +198,88 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
                 </div>
 
                 {!useMapSelection ? (
-                  <input
+                  <FormInput
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="e.g., 123 Gangnam-daero, Gangnam-gu"
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
+                    helperText="Address will be partially masked for privacy"
                   />
                 ) : (
-                  <MapSelectorInline
-                    value={mapLocation ? { address: mapLocation.address, lat: mapLocation.lat, lng: mapLocation.lng } : null}
-                    onChange={(loc) => {
-                      setMapLocation(loc);
-                      setAddress(loc.address);
-                      // Try to match district to our predefined list
-                      const matchedDistrict = allRegions.find(r =>
-                        loc.district.includes(r.name) || r.name.includes(loc.district)
-                      );
-                      if (matchedDistrict) {
-                        setDistrict(matchedDistrict.id);
-                      }
-                    }}
-                  />
+                  <>
+                    <MapSelectorInline
+                      value={mapLocation ? { address: mapLocation.address, lat: mapLocation.lat, lng: mapLocation.lng } : null}
+                      onChange={(loc) => {
+                        setMapLocation(loc);
+                        setAddress(loc.address);
+                        const matchedDistrict = allRegions.find(r =>
+                          loc.district.includes(r.name) || r.name.includes(loc.district)
+                        );
+                        if (matchedDistrict) {
+                          setDistrict(matchedDistrict.id);
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-slate-400 mt-1">
+                      Address will be partially masked for privacy
+                    </p>
+                  </>
                 )}
-
-                <p className="text-xs text-slate-400 mt-1">
-                  Address will be partially masked for privacy
-                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Area (sqm)</label>
-                  <input
-                    type="number"
-                    value={area}
-                    onChange={(e) => setArea(Number(e.target.value))}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Floor</label>
-                  <input
-                    type="number"
-                    value={floor}
-                    onChange={(e) => setFloor(Number(e.target.value))}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Built Year</label>
-                  <input
-                    type="number"
-                    value={buildingYear}
-                    onChange={(e) => setBuildingYear(Number(e.target.value))}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm"
-                  />
-                </div>
+                <FormInput
+                  label="Area (sqm)"
+                  type="number"
+                  value={area}
+                  onChange={(e) => setArea(Number(e.target.value))}
+                  inputSize="sm"
+                />
+                <FormInput
+                  label="Floor"
+                  type="number"
+                  value={floor}
+                  onChange={(e) => setFloor(Number(e.target.value))}
+                  inputSize="sm"
+                />
+                <FormInput
+                  label="Built Year"
+                  type="number"
+                  value={buildingYear}
+                  onChange={(e) => setBuildingYear(Number(e.target.value))}
+                  inputSize="sm"
+                />
               </div>
             </div>
-          </div>
+          </Card>
 
-          <button
-            onClick={() => setStep(2)}
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
             disabled={!address}
-            className="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-900 transition disabled:opacity-50"
+            onClick={() => goToStep(2)}
           >
             Next: Pricing
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Step 2: Pricing */}
       {step === 2 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <DollarSign size={20} className="text-brand-600" />
-              Transaction & Pricing
-            </h2>
+          <Card>
+            <SectionHeader icon={DollarSign} title="Transaction & Pricing" />
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Transaction Type</label>
-                <div className="flex gap-2">
-                  {[
-                    { id: 'sale', label: 'Sale' },
-                    { id: 'jeonse', label: 'Jeonse' },
-                    { id: 'monthly', label: 'Monthly' },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setSignalType(type.id as typeof signalType)}
-                      className={`flex-1 py-3 rounded-xl text-sm font-bold transition ${
-                        signalType === type.id
-                          ? 'bg-brand-600 text-white'
-                          : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
+                <SelectButton
+                  options={SIGNAL_TYPES.map(t => ({ id: t.id, label: t.label }))}
+                  value={signalType}
+                  onChange={(id) => setSignalType(id as typeof signalType)}
+                  variant="toggle"
+                />
               </div>
 
               <div>
@@ -368,21 +353,24 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
                 </label>
               </div>
             </div>
-          </div>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(1)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={prevStep}
+              icon={<ChevronLeft size={18} />}
             >
-              <ChevronLeft size={18} /> Back
-            </button>
-            <button
-              onClick={() => setStep(3)}
-              className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 transition"
+              Back
+            </Button>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => goToStep(3)}
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -390,80 +378,50 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
       {/* Step 3: Preferences */}
       {step === 3 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <Clock size={20} className="text-brand-600" />
-              Urgency & Preferences
-            </h2>
+          <Card>
+            <SectionHeader icon={Clock} title="Urgency & Preferences" />
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">How soon do you want to close?</label>
-                <div className="space-y-2">
-                  {[
-                    { id: 'urgent', label: 'Urgent', desc: 'Within 1 month' },
-                    { id: 'flexible', label: 'Flexible', desc: 'Within 3 months' },
-                    { id: 'exploring', label: 'Exploring', desc: 'No rush, testing market' },
-                  ].map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setUrgency(option.id as typeof urgency)}
-                      className={`w-full p-4 rounded-xl border text-left transition flex items-center justify-between ${
-                        urgency === option.id
-                          ? 'border-brand-500 bg-brand-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div>
-                        <p className="font-bold text-slate-800">{option.label}</p>
-                        <p className="text-sm text-slate-500">{option.desc}</p>
-                      </div>
-                      {urgency === option.id && (
-                        <Check size={20} className="text-brand-600" />
-                      )}
-                    </button>
-                  ))}
-                </div>
+                <SelectButton
+                  options={URGENCY_OPTIONS.map(o => ({ id: o.id, label: o.label, description: o.description }))}
+                  value={urgency}
+                  onChange={(id) => setUrgency(id as typeof urgency)}
+                  variant="card"
+                  showCheck
+                />
               </div>
 
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Preferred Buyer Types</label>
-                <div className="flex gap-2">
-                  {[
-                    { id: 'individual', label: 'Individual' },
-                    { id: 'corporate', label: 'Corporate' },
-                    { id: 'agent', label: 'Agent' },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => toggleBuyerType(type.id as 'individual' | 'corporate' | 'agent')}
-                      className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition ${
-                        preferredBuyerTypes.includes(type.id as 'individual' | 'corporate' | 'agent')
-                          ? 'bg-brand-600 text-white'
-                          : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
+                <SelectButton
+                  options={BUYER_TYPES.map(t => ({ id: t.id, label: t.label }))}
+                  value={preferredBuyerTypes}
+                  onChange={(id) => toggleBuyerType(id as 'individual' | 'corporate' | 'agent')}
+                  variant="toggle"
+                  multiple
+                />
               </div>
             </div>
-          </div>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(2)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={prevStep}
+              icon={<ChevronLeft size={18} />}
             >
-              <ChevronLeft size={18} /> Back
-            </button>
-            <button
-              onClick={() => setStep(4)}
-              className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 transition"
+              Back
+            </Button>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => goToStep(4)}
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -471,41 +429,20 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
       {/* Step 4: Visibility & Confirm */}
       {step === 4 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <Users size={20} className="text-brand-600" />
-              Visibility Settings
-            </h2>
+          <Card>
+            <SectionHeader icon={Users} title="Visibility Settings" />
 
-            <div className="space-y-2">
-              {[
-                { id: 'public', label: 'Public', desc: 'Visible to all verified users' },
-                { id: 'verified_only', label: 'Verified Only', desc: 'Only users with high Reality Score' },
-                { id: 'agents_only', label: 'Agents Only', desc: 'Only licensed real estate agents' },
-              ].map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => setVisibility(option.id as typeof visibility)}
-                  className={`w-full p-4 rounded-xl border text-left transition flex items-center justify-between ${
-                    visibility === option.id
-                      ? 'border-brand-500 bg-brand-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div>
-                    <p className="font-bold text-slate-800">{option.label}</p>
-                    <p className="text-sm text-slate-500">{option.desc}</p>
-                  </div>
-                  {visibility === option.id && (
-                    <Check size={20} className="text-brand-600" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+            <SelectButton
+              options={VISIBILITY_OPTIONS.map(o => ({ id: o.id, label: o.label, description: o.description }))}
+              value={visibility}
+              onChange={(id) => setVisibility(id as typeof visibility)}
+              variant="card"
+              showCheck
+            />
+          </Card>
 
           {/* Summary */}
-          <div className="bg-gray-50 p-4 rounded-xl">
+          <Card variant="flat" padding="md">
             <h3 className="font-bold text-slate-700 mb-3">Signal Summary</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -527,7 +464,7 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
                 <span className="font-medium text-slate-800 capitalize">{urgency}</span>
               </div>
             </div>
-          </div>
+          </Card>
 
           <div className="bg-brand-50 p-4 rounded-xl border border-brand-100">
             <p className="text-sm text-brand-700">
@@ -536,20 +473,23 @@ export function CreateSignalForm({ onSuccess, onCancel }: CreateSignalFormProps)
           </div>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(3)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={prevStep}
+              icon={<ChevronLeft size={18} />}
             >
-              <ChevronLeft size={18} /> Back
-            </button>
-            <button
+              Back
+            </Button>
+            <Button
+              variant="primary"
+              fullWidth
+              loading={loading}
               onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              icon={!loading ? <Check size={18} /> : undefined}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
               {loading ? 'Creating...' : 'Create Signal'}
-            </button>
+            </Button>
           </div>
 
           {onCancel && (

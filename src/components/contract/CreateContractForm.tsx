@@ -5,13 +5,11 @@
 
 import { useState } from 'react';
 import {
-  FileText,
   Calendar,
   DollarSign,
   User,
   Check,
   ChevronLeft,
-  Loader2,
   Home,
   PaintBucket,
   Landmark,
@@ -19,15 +17,38 @@ import {
 import { useCreateContract } from '../../services/contract';
 import { formatKRW } from '../../lib/utils/dsr';
 import type { CreateContractInput, ContractProperty } from '../../types/contract';
+import {
+  Button,
+  Card,
+  FormInput,
+  SelectButton,
+  SectionHeader,
+  ProgressBar,
+  useMultiStepForm,
+} from '../common';
 
 interface CreateContractFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
+const PROPERTY_TYPES = [
+  { id: 'apartment', label: 'Apartment' },
+  { id: 'villa', label: 'Villa' },
+  { id: 'officetel', label: 'Officetel' },
+  { id: 'house', label: 'House' },
+] as const;
+
+const CONTRACT_TYPES = [
+  { id: 'sale', label: 'Purchase' },
+  { id: 'jeonse', label: 'Jeonse' },
+  { id: 'monthly', label: 'Monthly' },
+] as const;
+
 export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormProps) {
-  const [step, setStep] = useState(1);
-  const totalSteps = 4;
+  const { step, totalSteps, prevStep, goToStep } = useMultiStepForm({
+    totalSteps: 4,
+  });
 
   // Property info
   const [address, setAddress] = useState('');
@@ -101,146 +122,95 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
 
   return (
     <div className="space-y-6">
-      {/* Progress Bar */}
-      <div className="flex gap-2">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`flex-1 h-1.5 rounded-full transition ${
-              i < step ? 'bg-brand-600' : 'bg-gray-200'
-            }`}
-          />
-        ))}
-      </div>
+      <ProgressBar current={step} total={totalSteps} />
 
       {/* Step 1: Property Info */}
       {step === 1 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <Home size={20} className="text-brand-600" />
-              Property Information
-            </h2>
+          <Card>
+            <SectionHeader icon={Home} title="Property Information" />
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Property Type</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'apartment', label: 'Apartment' },
-                    { id: 'villa', label: 'Villa' },
-                    { id: 'officetel', label: 'Officetel' },
-                    { id: 'house', label: 'House' },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setPropertyType(type.id as ContractProperty['propertyType'])}
-                      className={`py-3 rounded-xl text-sm font-bold transition ${
-                        propertyType === type.id
-                          ? 'bg-brand-600 text-white'
-                          : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">Full Address</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="e.g., 123 Gangnam-daero, Gangnam-gu, Seoul"
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
+                <SelectButton
+                  options={PROPERTY_TYPES.map(t => ({ id: t.id, label: t.label }))}
+                  value={propertyType}
+                  onChange={(id) => setPropertyType(id as ContractProperty['propertyType'])}
+                  variant="pill"
+                  columns={2}
                 />
               </div>
 
+              <FormInput
+                label="Full Address"
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="e.g., 123 Gangnam-daero, Gangnam-gu, Seoul"
+              />
+
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Area (sqm)</label>
-                  <input
-                    type="number"
-                    value={area}
-                    onChange={(e) => setArea(Number(e.target.value))}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Floor</label>
-                  <input
-                    type="number"
-                    value={floor}
-                    onChange={(e) => setFloor(Number(e.target.value))}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm"
-                  />
-                </div>
+                <FormInput
+                  label="Area (sqm)"
+                  type="number"
+                  value={area}
+                  onChange={(e) => setArea(Number(e.target.value))}
+                  inputSize="sm"
+                />
+                <FormInput
+                  label="Floor"
+                  type="number"
+                  value={floor}
+                  onChange={(e) => setFloor(Number(e.target.value))}
+                  inputSize="sm"
+                />
               </div>
             </div>
-          </div>
+          </Card>
 
-          <button
-            onClick={() => setStep(2)}
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
             disabled={!address}
-            className="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-900 transition disabled:opacity-50"
+            onClick={() => goToStep(2)}
           >
             Next: Contract Type & Dates
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Step 2: Contract Type & Dates */}
       {step === 2 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <Calendar size={20} className="text-brand-600" />
-              Contract Type & Dates
-            </h2>
+          <Card>
+            <SectionHeader icon={Calendar} title="Contract Type & Dates" />
 
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-slate-600 mb-2 block">Contract Type</label>
-                <div className="flex gap-2">
-                  {[
-                    { id: 'sale', label: 'Purchase' },
-                    { id: 'jeonse', label: 'Jeonse' },
-                    { id: 'monthly', label: 'Monthly' },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setContractType(type.id as 'sale' | 'jeonse' | 'monthly')}
-                      className={`flex-1 py-3 rounded-xl text-sm font-bold transition ${
-                        contractType === type.id
-                          ? 'bg-brand-600 text-white'
-                          : 'bg-gray-100 text-slate-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">Contract Date</label>
-                <input
-                  type="date"
-                  value={contractDate}
-                  onChange={(e) => setContractDate(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
+                <SelectButton
+                  options={CONTRACT_TYPES.map(t => ({ id: t.id, label: t.label }))}
+                  value={contractType}
+                  onChange={(id) => setContractType(id as 'sale' | 'jeonse' | 'monthly')}
+                  variant="toggle"
                 />
               </div>
 
+              <FormInput
+                label="Contract Date"
+                type="date"
+                value={contractDate}
+                onChange={(e) => setContractDate(e.target.value)}
+              />
+
               <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">Move-in Date</label>
-                <input
+                <FormInput
+                  label="Move-in Date"
                   type="date"
                   value={moveInDate}
                   onChange={(e) => setMoveInDate(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
                 />
                 {daysUntilMoveIn !== null && (
                   <p className={`text-sm mt-1 ${daysUntilMoveIn < 30 ? 'text-orange-600' : 'text-slate-500'}`}>
@@ -250,33 +220,33 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
               </div>
 
               {contractType !== 'sale' && (
-                <div>
-                  <label className="text-sm font-medium text-slate-600 mb-2 block">Contract End Date</label>
-                  <input
-                    type="date"
-                    value={contractEndDate}
-                    onChange={(e) => setContractEndDate(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
-                  />
-                </div>
+                <FormInput
+                  label="Contract End Date"
+                  type="date"
+                  value={contractEndDate}
+                  onChange={(e) => setContractEndDate(e.target.value)}
+                />
               )}
             </div>
-          </div>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(1)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={prevStep}
+              icon={<ChevronLeft size={18} />}
             >
-              <ChevronLeft size={18} /> Back
-            </button>
-            <button
-              onClick={() => setStep(3)}
+              Back
+            </Button>
+            <Button
+              variant="secondary"
+              fullWidth
               disabled={!contractDate || !moveInDate}
-              className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 transition disabled:opacity-50"
+              onClick={() => goToStep(3)}
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -284,11 +254,8 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
       {/* Step 3: Financials */}
       {step === 3 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <DollarSign size={20} className="text-brand-600" />
-              Financial Details
-            </h2>
+          <Card>
+            <SectionHeader icon={DollarSign} title="Financial Details" />
 
             <div className="space-y-4">
               <div>
@@ -314,29 +281,24 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">
-                    {contractType === 'sale' ? 'Down Payment' : 'Contract Deposit'} (M)
-                  </label>
-                  <input
-                    type="number"
-                    value={deposit}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setDeposit(val);
-                      setBalance(totalPrice - val);
-                    }}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm"
-                  />
-                </div>
+                <FormInput
+                  label={contractType === 'sale' ? 'Down Payment (M)' : 'Contract Deposit (M)'}
+                  type="number"
+                  value={deposit}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setDeposit(val);
+                    setBalance(totalPrice - val);
+                  }}
+                  inputSize="sm"
+                />
                 <div>
                   <label className="text-xs font-medium text-slate-500 mb-1 block">Balance (M)</label>
                   <input
                     type="number"
                     value={balance}
-                    onChange={(e) => setBalance(Number(e.target.value))}
-                    className="w-full p-2 rounded-lg border border-gray-200 text-sm bg-gray-50"
                     readOnly
+                    className="w-full p-2 rounded-lg border border-gray-200 text-sm bg-gray-50"
                   />
                 </div>
               </div>
@@ -396,21 +358,24 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
                 </label>
               </div>
             </div>
-          </div>
+          </Card>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(2)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={prevStep}
+              icon={<ChevronLeft size={18} />}
             >
-              <ChevronLeft size={18} /> Back
-            </button>
-            <button
-              onClick={() => setStep(4)}
-              className="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 transition"
+              Back
+            </Button>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => goToStep(4)}
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -418,41 +383,30 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
       {/* Step 4: Counterparty & Confirm */}
       {step === 4 && (
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-              <User size={20} className="text-brand-600" />
-              Counterparty Information
-            </h2>
+          <Card>
+            <SectionHeader icon={User} title="Counterparty Information" />
 
             <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">
-                  {contractType === 'sale' ? 'Seller Name' : 'Landlord Name'}
-                </label>
-                <input
-                  type="text"
-                  value={counterpartyName}
-                  onChange={(e) => setCounterpartyName(e.target.value)}
-                  placeholder="Enter name"
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
+              <FormInput
+                label={contractType === 'sale' ? 'Seller Name' : 'Landlord Name'}
+                type="text"
+                value={counterpartyName}
+                onChange={(e) => setCounterpartyName(e.target.value)}
+                placeholder="Enter name"
+              />
 
-              <div>
-                <label className="text-sm font-medium text-slate-600 mb-2 block">Phone (Optional)</label>
-                <input
-                  type="tel"
-                  value={counterpartyPhone}
-                  onChange={(e) => setCounterpartyPhone(e.target.value)}
-                  placeholder="010-1234-5678"
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
+              <FormInput
+                label="Phone (Optional)"
+                type="tel"
+                value={counterpartyPhone}
+                onChange={(e) => setCounterpartyPhone(e.target.value)}
+                placeholder="010-1234-5678"
+              />
             </div>
-          </div>
+          </Card>
 
           {/* Summary */}
-          <div className="bg-gray-50 p-4 rounded-xl">
+          <Card variant="flat" padding="md">
             <h3 className="font-bold text-slate-700 mb-3">Contract Summary</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -478,7 +432,7 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
                 </div>
               )}
             </div>
-          </div>
+          </Card>
 
           <div className="bg-brand-50 p-4 rounded-xl border border-brand-100">
             <p className="text-sm text-brand-700">
@@ -489,20 +443,24 @@ export function CreateContractForm({ onSuccess, onCancel }: CreateContractFormPr
           </div>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep(3)}
-              className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={prevStep}
+              icon={<ChevronLeft size={18} />}
             >
-              <ChevronLeft size={18} /> Back
-            </button>
-            <button
+              Back
+            </Button>
+            <Button
+              variant="primary"
+              fullWidth
+              loading={loading}
+              disabled={!counterpartyName}
               onClick={handleSubmit}
-              disabled={loading || !counterpartyName}
-              className="flex-1 bg-brand-600 text-white font-bold py-3 rounded-xl hover:bg-brand-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              icon={!loading ? <Check size={18} /> : undefined}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
               {loading ? 'Creating...' : 'Create Contract'}
-            </button>
+            </Button>
           </div>
 
           {onCancel && (
